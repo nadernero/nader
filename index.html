@@ -3,265 +3,403 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم تقييم الخدام</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <title>لوحة تقييم الخدام</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 CDN for professional icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" xintegrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0V4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- XLSX library for reading Excel files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- React and ReactDOM CDNs -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <!-- Babel for JSX transformation in browser (for simplicity, in production use build tools) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
-        
         body {
             font-family: 'Cairo', sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
         }
-        
         .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #4a00e0 0%, #8e2de2 100%); /* Deeper, richer gradient */
         }
-        
         .card {
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 16px; /* Slightly smaller radius for modern look */
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08); /* Softer shadow */
             padding: 24px;
             margin-bottom: 24px;
+            transition: all 0.3s ease;
         }
-        
-        .stat-card {
-            border-radius: 16px;
-            padding: 24px;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .blue-gradient { background: linear-gradient(135deg, #667eea, #764ba2); }
-        .green-gradient { background: linear-gradient(135deg, #f093fb, #f5576c); }
-        .purple-gradient { background: linear-gradient(135deg, #4facfe, #00f2fe); }
-        .orange-gradient { background: linear-gradient(135deg, #43e97b, #38f9d7); }
-        
         .file-input {
-            border: 2px dashed #667eea;
+            border: 2px dashed #6a11cb; /* Darker purple dashed border */
             border-radius: 12px;
             padding: 40px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
+            background-color: #ffffff;
         }
-        
         .file-input:hover {
-            border-color: #764ba2;
-            background-color: #f8f9ff;
+            border-color: #2575fc; /* Blue on hover */
+            background-color: #eef2ff; /* Light blue tint */
         }
-        
-        .btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: transform 0.2s ease;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-        
-        .loading {
+        .loading-screen {
             display: none;
             text-align: center;
             padding: 40px;
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
         }
-        
         .spinner {
             border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+            border-top: 4px solid #6a11cb; /* Consistent spinner color */
             border-radius: 50%;
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
         }
-        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
-        .chart-container {
-            position: relative;
-            height: 400px;
-            margin: 20px 0;
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
-        
-        select {
-            padding: 12px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 16px;
-            width: 100%;
-            margin-bottom: 16px;
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
         }
-        
-        select:focus {
-            outline: none;
-            border-color: #667eea;
+        ::-webkit-scrollbar-thumb {
+            background: #a0a0a0; /* Darker scrollbar thumb */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #777;
+        }
+
+        /* Modal specific styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .modal-overlay.open .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Mind Map SVG Styling */
+        .mind-map-node {
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            fill: #333;
+            text-anchor: middle;
+            transition: fill 0.3s ease;
+        }
+        .mind-map-node:hover {
+            fill: #4a00e0;
+        }
+        .mind-map-line {
+            stroke: #c0c0c0;
+            stroke-width: 1.5;
+            fill: none;
+            transition: stroke 0.3s ease, stroke-width 0.3s ease;
+        }
+        .mind-map-line:hover {
+            stroke: #8e2de2;
+            stroke-width: 2.5;
+        }
+        .mind-map-rect {
+            fill: #e0e7ff; /* Light blue background for nodes */
+            stroke: #a7c0f0; /* Slightly darker border */
+            stroke-width: 1;
+            rx: 8; /* Rounded corners */
+            ry: 8;
+            transition: fill 0.3s ease, stroke 0.3s ease;
+        }
+        .mind-map-rect:hover {
+            fill: #c7d8ff; /* Darker blue on hover */
+            stroke: #6a11cb;
+        }
+        /* Print specific styles */
+        @media print {
+            body {
+                background-color: #fff !important;
+            }
+            .gradient-bg, footer, .file-input, .loading-screen, .modal-overlay, .tab-buttons, .filter-section, .print-button-container {
+                display: none !important;
+            }
+            .container, main {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+            }
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #eee !important;
+                margin-bottom: 10px !important;
+                padding: 15px !important;
+            }
+            .mind-map-rect {
+                filter: none !important; /* Remove shadow for print */
+            }
+            /* Ensure charts render correctly for print */
+            canvas {
+                max-width: 100% !important;
+                height: auto !important;
+                page-break-inside: avoid;
+            }
         }
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- العنوان الرئيسي -->
-    <div class="gradient-bg text-white text-center py-12">
-        <h1 class="text-4xl font-bold mb-4">📊 لوحة تحكم تقييم الخدام</h1>
+    <!-- Main Title Section -->
+    <div class="gradient-bg text-white text-center py-12 shadow-lg">
+        <h1 class="text-4xl font-bold mb-4"><i class="fas fa-chart-bar fa-fw ml-2"></i> لوحة تحكم تقييم الخدام</h1>
         <p class="text-xl opacity-90">تحليل شامل لأداء الخدام عبر المحاور المختلفة</p>
     </div>
 
     <div class="container mx-auto px-6 py-8">
-        <!-- رفع الملف -->
-        <div class="card" id="fileUpload">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">📁 رفع ملف تقييم الخدام</h2>
-            <div class="file-input" onclick="document.getElementById('excelFile').click()">
-                <div class="text-6xl mb-4">📄</div>
+        <!-- File Upload Section -->
+        <div class="card transform transition-all duration-300 hover:scale-102 hover:shadow-xl" id="fileUploadSection">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center"><i class="fas fa-upload fa-fw ml-2"></i> رفع ملف تقييم الخدام</h2>
+            <div class="file-input" onclick="window.handleFileUploadClick()">
+                <div class="text-6xl mb-4"><i class="fas fa-file-excel text-green-600"></i></div>
                 <p class="text-lg font-semibold text-gray-700">اضغط هنا لرفع ملف Excel</p>
                 <p class="text-gray-500 text-sm mt-2">يدعم ملفات .xlsx و .xls</p>
-                <input type="file" id="excelFile" accept=".xlsx,.xls" style="display: none;" onchange="handleFileUpload(event)">
+                <input type="file" id="excelFile" accept=".xlsx,.xls" style="display: none;" onchange="window.handleFileChange(event)">
             </div>
         </div>
 
-        <!-- شاشة التحميل -->
-        <div class="loading" id="loadingScreen">
+        <!-- Loading Screen -->
+        <div class="loading-screen" id="loadingScreen">
             <div class="spinner"></div>
             <p class="text-lg text-gray-600">جاري تحليل البيانات...</p>
         </div>
 
-        <!-- لوحة التحكم -->
-        <div id="dashboard" style="display: none;">
-            <!-- فلاتر البحث -->
-            <div class="card">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">🔍 فلاتر البحث</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">نوع الخدمة</label>
-                        <select id="serviceFilter" onchange="applyFilters()">
-                            <option value="الكل">الكل</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">الفصل</label>
-                        <select id="classFilter" onchange="applyFilters()">
-                            <option value="الكل">الكل</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- الإحصائيات السريعة -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="stat-card blue-gradient">
-                    <div>
-                        <p class="text-sm opacity-80">إجمالي الخدام</p>
-                        <p class="text-3xl font-bold" id="totalServers">0</p>
-                    </div>
-                    <div class="text-4xl opacity-60">👥</div>
-                </div>
-                
-                <div class="stat-card green-gradient">
-                    <div>
-                        <p class="text-sm opacity-80">متوسط الأداء</p>
-                        <p class="text-3xl font-bold" id="avgScore">0%</p>
-                    </div>
-                    <div class="text-4xl opacity-60">📈</div>
-                </div>
-                
-                <div class="stat-card purple-gradient">
-                    <div>
-                        <p class="text-sm opacity-80">أفضل خادم</p>
-                        <p class="text-lg font-bold" id="topPerformer">-</p>
-                        <p class="text-sm opacity-80" id="topScore">0%</p>
-                    </div>
-                    <div class="text-4xl opacity-60">🏆</div>
-                </div>
-                
-                <div class="stat-card orange-gradient">
-                    <div>
-                        <p class="text-sm opacity-80">الأداء المتميز</p>
-                        <p class="text-3xl font-bold" id="excellentCount">0</p>
-                        <p class="text-sm opacity-80" id="excellentPercentage">0%</p>
-                    </div>
-                    <div class="text-4xl opacity-60">⭐</div>
-                </div>
-            </div>
-
-            <!-- الرسوم البيانية -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                <div class="card">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4 text-center">متوسط الأداء حسب المحاور</h3>
-                    <div class="chart-container">
-                        <canvas id="radarChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4 text-center">التوزيع حسب نوع الخدمة</h3>
-                    <div class="chart-container">
-                        <canvas id="serviceChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- أفضل الخدام -->
-            <div class="card">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4 text-center">🏆 أفضل 10 خدام في الأداء</h3>
-                <div class="chart-container">
-                    <canvas id="topPerformersChart"></canvas>
-                </div>
-            </div>
-
-            <!-- توزيع مستويات الأداء -->
-            <div class="card">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4 text-center">توزيع مستويات الأداء</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="performanceLevels">
-                </div>
-            </div>
-        </div>
+        <!-- React Dashboard Root -->
+        <div id="react-dashboard-root"></div>
     </div>
 
-    <script>
-        let allData = [];
-        let filteredData = [];
-        let charts = {};
+    <!-- Footer Section -->
+    <footer class="bg-gradient-to-r from-indigo-800 to-purple-900 text-white py-8 mt-12 shadow-inner">
+        <div class="container mx-auto px-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <h3 class="text-lg font-bold mb-4 flex items-center">
+                <i class="fas fa-star fa-fw ml-2"></i>
+                نظام تقييم الخدام
+              </h3>
+              <p class="text-indigo-100">
+                نظام متكامل لتقييم أداء الخدام في مختلف المجالات والخدمات، يساعد على تطوير العمل الخدمي.
+              </p>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold mb-4">روابط سريعة</h3>
+              <ul class="space-y-2">
+                <li><a href="#" class="text-indigo-100 hover:text-white transition-colors"><i class="fas fa-home fa-fw ml-2"></i>الصفحة الرئيسية</a></li>
+                <li><a href="#" class="text-indigo-100 hover:text-white transition-colors"><i class="fas fa-clipboard-list fa-fw ml-2"></i>تقييمات الخدام</a></li>
+                <li><a href="#" class="text-indigo-100 hover:text-white transition-colors"><i class="fas fa-file-alt fa-fw ml-2"></i>تقارير الأداء</a></li>
+                <li><a href="#" class="text-indigo-100 hover:text-white transition-colors"><i class="fas fa-envelope fa-fw ml-2"></i>تواصل معنا</a></li>
+              </ul>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold mb-4">اتصل بنا</h3>
+              <p class="text-indigo-100"><i class="fas fa-at fa-fw ml-2"></i>البريد الإلكتروني: info@evaluation.com</p>
+              <p class="text-indigo-100"><i class="fas fa-phone fa-fw ml-2"></i>الهاتف: +20 123 456 7890</p>
+              <p class="text-indigo-100"><i class="fas fa-map-marker-alt fa-fw ml-2"></i>العنوان: القاهرة، مصر</p>
+            </div>
+          </div>
+          <div class="border-t border-indigo-700 mt-8 pt-6 text-center text-indigo-200">
+            <p>© 2023 نظام تقييم الخدام. جميع الحقوق محفوظة.</p>
+          </div>
+        </div>
+    </footer>
 
-        // دالة آمنة لتحويل القيم إلى أرقام
-        function safeParseFloat(value) {
+    <!-- Global Utility Functions (must be defined before React components and their usage) -->
+    <script>
+        // Global variables for React root and data
+        let reactRoot = null;
+        let globalDashboardData = [];
+
+        /**
+         * Safely parses a value to a float, handling null, undefined, empty strings, and non-numeric values.
+         * Converts percentages (values > 1) to decimals.
+         * @param {*} value - The value to parse.
+         * @returns {number} The parsed float value, clamped between 0 and 1.
+         */
+        const safeParseFloat = (value) => {
             if (value === null || value === undefined || value === '' || value === '#N/A' || value === 0) return 0;
             
             let parsed = parseFloat(value);
             
             if (isNaN(parsed)) return 0;
             
-            // القيم يجب أن تكون بين 0 و 1 (نسب عشرية)
-            // إذا كانت القيمة أكبر من 1، نفترض أنها نسبة مئوية ونحولها
+            // Values should be between 0 and 1 (decimal percentages)
+            // If value is greater than 1, assume it's a percentage and convert
             if (parsed > 1) {
                 parsed = parsed / 100;
             }
             
             return Math.max(0, Math.min(1, parsed));
-        }
+        };
 
-        // دالة تحويل إلى نسبة مئوية
-        function toPercentage(value) {
-            const num = safeParseFloat(value);
-            return parseFloat((num * 100).toFixed(1));
-        }
+        /**
+         * Parses raw JSON data from Excel into a structured format for the dashboard.
+         * Uses header names to map columns, making it more robust.
+         * @param {Array<Array<any>>} jsonData - The raw JSON data from the Excel sheet.
+         * @returns {Array<Object>} An array of parsed server data objects.
+         */
+        const parseExcelData = (jsonData) => {
+            const parsedData = [];
 
-        // معالجة رفع الملف
-        function handleFileUpload(event) {
+            if (!jsonData || jsonData.length < 2) { // Need at least 2 rows: headers and one data row
+                return parsedData;
+            }
+
+            const headerRow = jsonData[0]; // Assuming first row is header
+            const columnMap = {};
+
+            // Normalize header names for mapping
+            const normalizeHeader = (header) => String(header).trim().replace(/\s+/g, ' ').replace(/\n/g, ' ');
+
+            // Define expected headers and their corresponding data keys
+            const expectedHeaders = {
+                'اسم الخادم': 'name',
+                'الخدمة الحالية': 'service',
+                'الفصل': 'class',
+                'نسبة المحور 1': 'axis1',
+                'نسبة المحور 2': 'axis2',
+                'نسبة المحور 3': 'axis3',
+                'نسبة المحور 4': 'axis4',
+                'نسبة المحور 5': 'axis5',
+                'نسبة المحور 6': 'axis6',
+                'المتوسط العام': 'average',
+                'نقاط القوة': 'strengths',
+                'السليبات والضعف': 'weaknesses',
+                'ملاحظات الأمين': 'notes'
+            };
+
+            // Build column map from actual headers to internal keys
+            headerRow.forEach((header, index) => {
+                const normalizedHeader = normalizeHeader(header);
+                for (const key in expectedHeaders) {
+                    if (normalizeHeader(key) === normalizedHeader) {
+                        columnMap[expectedHeaders[key]] = index;
+                        break;
+                    }
+                }
+            });
+
+            // Check if all essential columns are found
+            const essentialColumns = ['name', 'average']; // Minimum required columns
+            for (const col of essentialColumns) {
+                if (columnMap[col] === undefined) {
+                    console.warn(`Missing essential column: ${col}. Data parsing might be incomplete.`);
+                }
+            }
+
+            // Start parsing data from the row after the header (index 1)
+            for (let i = 1; i < jsonData.length; i++) {
+                const row = jsonData[i];
+                // Skip empty rows or rows without a name
+                if (!row || !row[columnMap.name] || String(row[columnMap.name]).trim() === '') {
+                    continue;
+                }
+
+                const name = String(row[columnMap.name] || '').trim();
+                
+                // Only add data if name is present and not '#N/A'
+                if (name && name !== '#N/A') {
+                    parsedData.push({
+                        name: name,
+                        service: String(row[columnMap.service] || 'غير محدد').trim(),
+                        class: String(row[columnMap.class] || 'غير محدد').trim(),
+                        axis1: safeParseFloat(row[columnMap.axis1]),
+                        axis2: safeParseFloat(row[columnMap.axis2]),
+                        axis3: safeParseFloat(row[columnMap.axis3]),
+                        axis4: safeParseFloat(row[columnMap.axis4]),
+                        axis5: safeParseFloat(row[columnMap.axis5]),
+                        axis6: safeParseFloat(row[columnMap.axis6]),
+                        average: safeParseFloat(row[columnMap.average]),
+                        strengths: String(row[columnMap.strengths] || '').trim(),
+                        weaknesses: String(row[columnMap.weaknesses] || '').trim(),
+                        notes: String(row[columnMap.notes] || '').trim(),
+                        fullName: name // Store full name for display
+                    });
+                }
+            }
+            return parsedData;
+        };
+
+        /**
+         * Function to reset the UI to file upload state (global scope)
+         */
+        const resetToFileUpload = () => {
+            document.getElementById('fileUploadSection').style.display = 'block';
+            document.getElementById('loadingScreen').style.display = 'none';
+            if (reactRoot) {
+                // Unmount the React component if it's mounted
+                reactRoot.render(null); 
+            }
+            globalDashboardData = []; // Clear global data
+        };
+
+        /**
+         * Event handler for file input click (global scope)
+         * Opens the file selection dialog.
+         */
+        window.handleFileUploadClick = () => {
+            document.getElementById('excelFile').click();
+        };
+
+        /**
+         * Event handler for file change (global scope)
+         * Reads the Excel file and parses its data.
+         * @param {Event} event - The file change event.
+         */
+        window.handleFileChange = (event) => {
             const file = event.target.files[0];
             if (!file) return;
 
-            document.getElementById('fileUpload').style.display = 'none';
+            document.getElementById('fileUploadSection').style.display = 'none';
             document.getElementById('loadingScreen').style.display = 'block';
 
             const reader = new FileReader();
@@ -269,404 +407,1451 @@
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
-                    const sheetName = workbook.SheetNames[0];
+                    const sheetName = workbook.SheetNames[0]; // Assume the first sheet
                     const worksheet = workbook.Sheets[sheetName];
                     const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-                    parseData(jsonData);
+                    const parsedData = parseExcelData(jsonData);
+                    if (parsedData.length > 0) {
+                        // Call renderDashboard which is defined after React components
+                        renderDashboard(parsedData); 
+                    } else {
+                        // Use custom message instead of alert
+                        window.showMessage('error', 'لم يتم العثور على بيانات صالحة في الملف. تأكد من أن الملف يحتوي على أسماء الخدام والنتائج.');
+                        resetToFileUpload();
+                    }
                 } catch (error) {
-                    alert('خطأ في قراءة الملف: ' + error.message);
+                    // Handle file reading errors
+                    window.showMessage('error', 'خطأ في قراءة الملف: ' + error.message);
+                    console.error('File reading error:', error);
                     resetToFileUpload();
+                } finally {
+                    document.getElementById('loadingScreen').style.display = 'none';
                 }
             };
             reader.readAsArrayBuffer(file);
-        }
+        };
+    </script>
 
-        // إعادة تعيين الواجهة لحالة رفع الملف
-        function resetToFileUpload() {
-            document.getElementById('fileUpload').style.display = 'block';
-            document.getElementById('loadingScreen').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'none';
-        }
+    <!-- React Components (Babel needs to process this first) -->
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useCallback, useRef } = React;
+        
+        /**
+         * Custom Message Display Component.
+         * @param {Object} props - Component props.
+         * @param {Object} props.message - Message object { type: 'success'|'error'|'info', text: '...' }.
+         * @param {function} props.onClose - Function to close the message.
+         */
+        const CustomMessage = ({ message, onClose }) => {
+            if (!message) return null;
 
-        // تحليل البيانات
-        function parseData(jsonData) {
-            allData = [];
+            const bgColor = message.type === 'error' ? 'bg-red-500' : 'bg-green-500';
+            const icon = message.type === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-check-circle';
 
-            if (!jsonData || jsonData.length < 3) {
-                alert('الملف لا يحتوي على بيانات كافية');
-                resetToFileUpload();
-                return;
-            }
-
-            console.log('البيانات الخام:', jsonData.slice(0, 5)); // للتشخيص
-
-            // البدء من الصف الثالث (index 2) حيث تبدأ بيانات الخدام
-            for (let i = 2; i < jsonData.length; i++) {
-                const row = jsonData[i];
-                if (row && row.length > 0 && row[0] && String(row[0]).trim() !== '') {
-                    const name = String(row[0]).trim();
-                    const service = String(row[1] || 'غير محدد').trim();
-                    const className = String(row[2] || 'غير محدد').trim();
-                    
-                    // قراءة النسب من الأعمدة الصحيحة (19-24)
-                    const axis1 = safeParseFloat(row[19]); // نسبة المحور 1
-                    const axis2 = safeParseFloat(row[20]); // نسبة المحور 2
-                    const axis3 = safeParseFloat(row[21]); // نسبة المحور 3
-                    const axis4 = safeParseFloat(row[22]); // نسبة المحور 4
-                    const axis5 = safeParseFloat(row[23]); // نسبة المحور 5
-                    const axis6 = safeParseFloat(row[24]); // نسبة المحور 6
-                    
-                    // المتوسط العام من العمود 25
-                    let average = safeParseFloat(row[25]);
-                    
-                    // التحقق من أن المتوسط صحيح (يجب أن يكون بين 0 و 1)
-                    if (average > 1) {
-                        average = average / 100;
-                    }
-
-                    const serverData = {
-                        name: name,
-                        service: service,
-                        class: className,
-                        axis1: axis1,
-                        axis2: axis2,
-                        axis3: axis3,
-                        axis4: axis4,
-                        axis5: axis5,
-                        axis6: axis6,
-                        average: average,
-                        strengths: String(row[27] || '').trim(),
-                        weaknesses: String(row[28] || '').trim(),
-                        notes: String(row[29] || '').trim()
-                    };
-
-                    // التحقق من صحة البيانات
-                    if (name && name !== '' && name !== '#N/A' && 
-                        (average > 0 || axis1 > 0 || axis2 > 0 || axis3 > 0 || axis4 > 0 || axis5 > 0 || axis6 > 0)) {
-                        allData.push(serverData);
-                        console.log(`تم إضافة: ${serverData.name} - ${serverData.service} - ${serverData.class} - متوسط: ${(serverData.average * 100).toFixed(1)}%`);
-                    }
-                }
-            }
-
-            if (allData.length === 0) {
-                alert('لم يتم العثور على بيانات صالحة في الملف. تأكد من أن الملف يحتوي على أسماء الخدام والنتائج');
-                resetToFileUpload();
-                return;
-            }
-
-            console.log('تم تحميل', allData.length, 'خادم بنجاح');
-            console.log('عينة من البيانات:', allData.slice(0, 3));
-
-            setupFilters();
-            filteredData = [...allData];
-            updateDashboard();
-
-            document.getElementById('loadingScreen').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'block';
-        }
-
-        // إعداد الفلاتر
-        function setupFilters() {
-            // استخراج الخدمات والفصول الفريدة
-            const services = [...new Set(allData
-                .map(item => item.service)
-                .filter(service => service && service !== 'غير محدد' && service.trim() !== '')
-            )].sort();
-            
-            const classes = [...new Set(allData
-                .map(item => item.class)
-                .filter(cls => cls && cls !== 'غير محدد' && cls.trim() !== '')
-            )].sort();
-
-            console.log('الخدمات المستخرجة:', services);
-            console.log('الفصول المستخرجة:', classes);
-
-            const serviceFilter = document.getElementById('serviceFilter');
-            const classFilter = document.getElementById('classFilter');
-
-            // مسح الخيارات الحالية
-            serviceFilter.innerHTML = '<option value="الكل">الكل</option>';
-            classFilter.innerHTML = '<option value="الكل">الكل</option>';
-
-            // إضافة الخدمات
-            services.forEach(service => {
-                const option = document.createElement('option');
-                option.value = service;
-                option.textContent = service;
-                serviceFilter.appendChild(option);
-            });
-
-            // إضافة الفصول
-            classes.forEach(cls => {
-                const option = document.createElement('option');
-                option.value = cls;
-                option.textContent = cls;
-                classFilter.appendChild(option);
-            });
-
-            console.log('تم إعداد الفلاتر بنجاح');
-            console.log(`عدد الخدمات: ${services.length}, عدد الفصول: ${classes.length}`);
-        }
-
-        // تطبيق الفلاتر
-        function applyFilters() {
-            const selectedService = document.getElementById('serviceFilter').value;
-            const selectedClass = document.getElementById('classFilter').value;
-
-            filteredData = allData.filter(item => {
-                const serviceMatch = selectedService === 'الكل' || item.service === selectedService;
-                const classMatch = selectedClass === 'الكل' || item.class === selectedClass;
-                return serviceMatch && classMatch;
-            });
-
-            updateDashboard();
-        }
-
-        // تحديث لوحة التحكم
-        function updateDashboard() {
-            updateStatistics();
-            updateCharts();
-            updatePerformanceLevels();
-        }
-
-        // تحديث الإحصائيات
-        function updateStatistics() {
-            const validData = filteredData.filter(item => item.average > 0);
-            
-            if (validData.length === 0) {
-                document.getElementById('totalServers').textContent = '0';
-                document.getElementById('avgScore').textContent = '0%';
-                document.getElementById('topPerformer').textContent = 'لا يوجد';
-                document.getElementById('topScore').textContent = '0%';
-                document.getElementById('excellentCount').textContent = '0';
-                document.getElementById('excellentPercentage').textContent = '0%';
-                return;
-            }
-
-            const totalServers = validData.length;
-            const avgScore = validData.reduce((sum, item) => sum + item.average, 0) / totalServers;
-            const topPerformer = validData.reduce((prev, current) => 
-                (prev.average > current.average) ? prev : current
+            return (
+                <div className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white z-50 flex items-center ${bgColor}`}>
+                    <i className={`${icon} ml-2 text-xl`}></i>
+                    <span>{message.text}</span>
+                    <button onClick={onClose} className="mr-4 text-white font-bold text-lg">
+                        <i className="fas fa-times"></i>
+                    </button>
+                </div>
             );
-            const excellentCount = validData.filter(item => item.average >= 0.9).length;
+        };
 
-            document.getElementById('totalServers').textContent = totalServers;
-            document.getElementById('avgScore').textContent = toPercentage(avgScore) + '%';
-            document.getElementById('topPerformer').textContent = topPerformer.name;
-            document.getElementById('topScore').textContent = toPercentage(topPerformer.average) + '%';
-            document.getElementById('excellentCount').textContent = excellentCount;
-            document.getElementById('excellentPercentage').textContent = 
-                ((excellentCount / totalServers) * 100).toFixed(1) + '%';
-        }
+        /**
+         * Modal component to display a list of servers for a given performance level.
+         * @param {Object} props - Component props.
+         * @param {boolean} props.isOpen - Whether the modal is open.
+         * @param {function} props.onClose - Function to close the modal.
+         * @param {Object} props.level - The performance level object (e.g., { label: 'ممتاز', color: '#10b981', iconClass: 'star' }).
+         * @param {Array<Object>} props.servers - Array of server objects belonging to this level.
+         */
+        const ServerListModal = ({ isOpen, onClose, level, servers }) => {
+            if (!isOpen) return null;
 
-        // تحديث الرسوم البيانية
-        function updateCharts() {
-            // تدمير الرسوم القديمة
-            Object.values(charts).forEach(chart => {
-                if (chart && typeof chart.destroy === 'function') {
-                    chart.destroy();
-                }
-            });
-            charts = {};
-
-            const validData = filteredData.filter(item => item.average > 0);
-            
-            if (validData.length === 0) {
-                // إخفاء الرسوم إذا لم تكن هناك بيانات
-                return;
-            }
-
-            // الرسم الراداري للمحاور
-            const axisNames = [
-                'الجانب الروحي',
-                'الالتزام والانضباط',
-                'مهارات الأداء',
-                'العمل الجماعي',
-                'النمو والتطوير',
-                'تقديم الدرس'
-            ];
-
-            const axisData = axisNames.map((name, index) => {
-                const axisKey = `axis${index + 1}`;
-                const validValues = validData.filter(item => item[axisKey] > 0);
-                const avg = validValues.length > 0 
-                    ? validValues.reduce((sum, item) => sum + item[axisKey], 0) / validValues.length 
-                    : 0;
-                return toPercentage(avg);
-            });
-
-            const radarCtx = document.getElementById('radarChart').getContext('2d');
-            charts.radar = new Chart(radarCtx, {
-                type: 'radar',
-                data: {
-                    labels: axisNames,
-                    datasets: [{
-                        label: 'النسبة المئوية',
-                        data: axisData,
-                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
-                        borderColor: 'rgba(102, 126, 234, 1)',
-                        borderWidth: 2,
-                        pointBackgroundColor: 'rgba(102, 126, 234, 1)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(102, 126, 234, 1)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            beginAtZero: true,
-                            max: 100,
-                            ticks: {
-                                stepSize: 20
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
-
-            // رسم التوزيع حسب الخدمة
-            const serviceStats = {};
-            validData.forEach(item => {
-                if (!serviceStats[item.service]) {
-                    serviceStats[item.service] = { count: 0, totalScore: 0 };
-                }
-                serviceStats[item.service].count++;
-                serviceStats[item.service].totalScore += item.average;
-            });
-
-            const serviceLabels = Object.keys(serviceStats);
-            const serviceCounts = serviceLabels.map(service => serviceStats[service].count);
-
-            const serviceCtx = document.getElementById('serviceChart').getContext('2d');
-            charts.service = new Chart(serviceCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: serviceLabels,
-                    datasets: [{
-                        data: serviceCounts,
-                        backgroundColor: [
-                            '#667eea',
-                            '#764ba2',
-                            '#f093fb',
-                            '#f5576c',
-                            '#4facfe',
-                            '#00f2fe',
-                            '#43e97b',
-                            '#38f9d7'
-                        ],
-                        borderWidth: 2,
-                        borderColor: '#fff'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                usePointStyle: true,
-                                padding: 20
-                            }
-                        }
-                    }
-                }
-            });
-
-            // أفضل 10 خدام
-            const topPerformers = validData
-                .sort((a, b) => b.average - a.average)
-                .slice(0, 10);
-
-            const topNames = topPerformers.map(item => 
-                item.name.length > 15 ? item.name.substring(0, 15) + '...' : item.name
-            );
-            const topScores = topPerformers.map(item => toPercentage(item.average));
-
-            const topCtx = document.getElementById('topPerformersChart').getContext('2d');
-            charts.top = new Chart(topCtx, {
-                type: 'bar',
-                data: {
-                    labels: topNames,
-                    datasets: [{
-                        label: 'النسبة المئوية',
-                        data: topScores,
-                        backgroundColor: 'rgba(255, 198, 88, 0.8)',
-                        borderColor: 'rgba(255, 198, 88, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            max: 100
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
-        }
-
-        // تحديث توزيع مستويات الأداء
-        function updatePerformanceLevels() {
-            const levels = [
-                { label: 'ممتاز (90% فأكثر)', min: 0.9, color: 'bg-green-500', textColor: 'text-green-700' },
-                { label: 'جيد جداً (80-89%)', min: 0.8, max: 0.89, color: 'bg-blue-500', textColor: 'text-blue-700' },
-                { label: 'جيد (70-79%)', min: 0.7, max: 0.79, color: 'bg-yellow-500', textColor: 'text-yellow-700' },
-                { label: 'مقبول (أقل من 70%)', max: 0.69, color: 'bg-red-500', textColor: 'text-red-700' }
-            ];
-
-            const container = document.getElementById('performanceLevels');
-            container.innerHTML = '';
-
-            const validData = filteredData.filter(item => item.average > 0);
-
-            levels.forEach(level => {
-                const count = validData.filter(item => {
-                    if (level.min && level.max) {
-                        return item.average >= level.min && item.average <= level.max;
-                    } else if (level.min) {
-                        return item.average >= level.min;
-                    } else {
-                        return item.average <= level.max;
-                    }
-                }).length;
-
-                const percentage = validData.length ? 
-                    ((count / validData.length) * 100).toFixed(1) : '0.0';
-
-                container.innerHTML += `
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <div class="flex items-center gap-3 mb-2">
-                            <div class="w-4 h-4 rounded-full ${level.color}"></div>
-                            <span class="font-medium text-sm">${level.label}</span>
+            return (
+                <div className={`modal-overlay ${isOpen ? 'open' : ''}`} onClick={onClose}>
+                    <div className="modal-content w-full md:w-3/4 lg:w-1/2" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
+                            <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+                                <i className={`fas fa-${level.iconClass} fa-fw mr-3 text-2xl`} style={{ color: level.color }}></i>
+                                الخدام في مستوى: <span className="mr-2" style={{ color: level.color }}>{level.label}</span>
+                            </h2>
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-800 transition-colors text-2xl">
+                                <i className="fas fa-times"></i>
+                            </button>
                         </div>
-                        <div class="text-center">
-                            <div class="text-2xl font-bold ${level.textColor}">${count}</div>
-                            <div class="text-gray-500 text-sm">(${percentage}%)</div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-96 overflow-y-auto pr-2">
+                            {servers.length > 0 ? (
+                                servers.map((server, index) => (
+                                    <div key={index} className="bg-gray-50 p-3 rounded-lg border border-gray-200 flex flex-col shadow-sm">
+                                        <p className="font-semibold text-gray-800 truncate mb-1" title={server.fullName || server.name}>
+                                            {index + 1}. {server.fullName || server.name}
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            <span className="font-medium ml-1">النسبة:</span> {((server.average || 0) * 100).toFixed(1)}%
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            <span className="font-medium ml-1">الخدمة:</span> {server.service || 'غير محدد'}
+                                        </p>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="col-span-full text-center text-gray-600 py-4">لا يوجد خدام في هذا المستوى.</p>
+                            )}
                         </div>
                     </div>
+                </div>
+            );
+        };
+
+        /**
+         * Main React component for the Server Evaluation Dashboard.
+         * Manages data, filters, sorting, tabs, and renders charts and server lists.
+         * @param {Object} props - Component props.
+         * @param {Array<Object>} props.initialData - Initial data loaded from the Excel file.
+         */
+        window.ServerEvaluationDashboard = ({ initialData }) => { /* Made global for renderDashboard */
+            const [data, setData] = useState([]); // Original data from Excel
+            const [filteredData, setFilteredData] = useState([]); // Data after applying filters and sort
+            const [selectedService, setSelectedService] = useState('الكل');
+            const [selectedClass, setSelectedClass] = useState('الكل');
+            const [loading, setLoading] = useState(true);
+            const [expandedServers, setExpandedServers] = useState({});
+            const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard', 'servers', 'mindmap'
+            const [performanceSort, setPerformanceSort] = useState('desc'); // 'desc' for highest, 'asc' for lowest
+            const [selectedServerFilter, setSelectedServerFilter] = useState('الكل'); // For actual server filter
+            const [isModalOpen, setIsModalOpen] = useState(false);
+            const [modalContent, setModalContent] = useState({ level: null, servers: [] });
+            const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+            const [message, setMessage] = useState(null); // { type: 'success'|'error'|'info', text: '...' }
+
+            // State for AI suggestions
+            const [generatedSuggestions, setGeneratedSuggestions] = useState({}); // { serverName: "suggestions text" }
+            const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState({}); // { serverName: boolean }
+
+            // Refs for Chart.js canvases
+            const radarChartRef = useRef(null);
+            const serviceDoughnutChartRef = useRef(null); 
+            const chartInstance = useRef({}); // To store Chart.js instances for multiple charts
+
+            // Diverse colors for charts
+            const chartColors = [
+                '#6a11cb', '#2575fc', '#6dd5ed', '#4facfe', '#0cbaba', '#00c6fb', '#005bea', '#00d2ff',
+                '#ff7e5f', '#feb47b', '#ffc72c', '#f7b731', '#f97316', '#ff4b1f', '#f02fc2', '#6094ea'
+            ];
+            
+            // Function to show custom message
+            window.showMessage = (type, text) => { // Made global for use in global script
+                setMessage({ type, text });
+                setTimeout(() => setMessage(null), 5000); // Clear after 5 seconds
+            };
+
+            // Set initial data and loading state when initialData prop changes
+            useEffect(() => {
+                if (initialData && initialData.length > 0) {
+                    setData(initialData);
+                    setLoading(false);
+                } else {
+                    setLoading(false); 
+                }
+            }, [initialData]);
+
+            // Filtering and Sorting Logic: Recalculates filteredData whenever dependencies change
+            useEffect(() => {
+                let currentFiltered = [...data]; // Start with a copy of original data
+
+                // Apply Service Filter
+                if (selectedService !== 'الكل') {
+                    currentFiltered = currentFiltered.filter(item => item.service === selectedService);
+                }
+                
+                // Apply Class Filter
+                if (selectedClass !== 'الكل') {
+                    currentFiltered = currentFiltered.filter(item => item.class === selectedClass);
+                }
+                
+                // Apply Server Name Filter
+                if (selectedServerFilter !== 'الكل') {
+                    currentFiltered = currentFiltered.filter(item => item.name === selectedServerFilter);
+                }
+
+                // Apply Sorting based on performanceSort state
+                const sortedData = [...currentFiltered].sort((a, b) => {
+                    const scoreA = a.average || 0;
+                    const scoreB = b.average || 0;
+                    return performanceSort === 'desc' ? scoreB - scoreA : scoreA - b.average;
+                });
+
+                setFilteredData(sortedData);
+            }, [data, selectedService, selectedClass, selectedServerFilter, performanceSort]); // Dependencies for this effect
+
+            // Extract unique services from the data for filter dropdown
+            const services = useMemo(() => {
+                const serviceSet = new Set(data.map(item => item.service).filter(s => s && s.trim() !== '' && s !== 'غير محدد'));
+                return ['الكل', ...Array.from(serviceSet)];
+            }, [data]);
+
+            // Extract unique classes based on the selected service for filter dropdown
+            const classesForService = useMemo(() => {
+                let classes = [];
+                if (selectedService === 'الكل') {
+                    classes = data.map(item => item.class).filter(c => c && c.trim() !== '' && c !== 'غير محدد');
+                } else {
+                    classes = data
+                        .filter(item => item.service === selectedService)
+                        .map(item => item.class)
+                        .filter(c => c && c.trim() !== '' && c !== 'غير محدد');
+                }
+                const classSet = new Set(classes);
+                return ['الكل', ...Array.from(classSet)];
+            }, [data, selectedService]);
+
+            // Extract unique server names for filter dropdown
+            const serverNames = useMemo(() => {
+                const nameSet = new Set(data.map(item => item.name).filter(n => n && n.trim() !== ''));
+                return ['الكل', ...Array.from(nameSet).sort()];
+            }, [data]);
+
+            // Calculate general statistics based on filtered data
+            const statistics = useMemo(() => {
+                if (filteredData.length === 0) {
+                    return {
+                        totalServers: 0,
+                        avgScore: '0.0',
+                        topPerformer: 'لا يوجد',
+                        topScore: '0.0',
+                        excellentCount: 0,
+                        excellentPercentage: '0.0',
+                        improvementCount: 0
+                    };
+                }
+                
+                const validData = filteredData.filter(item => !isNaN(item.average) && item.average > 0);
+                if (validData.length === 0) {
+                    return {
+                        totalServers: 0,
+                        avgScore: '0.0',
+                        topPerformer: 'لا يوجد',
+                        topScore: '0.0',
+                        excellentCount: 0,
+                        excellentPercentage: '0.0',
+                        improvementCount: 0
+                    };
+                }
+                
+                const totalServers = validData.length;
+                const avgScore = validData.reduce((sum, item) => sum + item.average, 0) / totalServers;
+                const topPerformer = validData.reduce((prev, current) => (prev.average > current.average) ? prev : current);
+                const excellentCount = validData.filter(item => item.average >= 0.9).length;
+                const improvementCount = validData.filter(item => item.average < 0.7).length;
+                
+                return {
+                    totalServers,
+                    avgScore: isNaN(avgScore) ? '0.0' : (avgScore * 100).toFixed(1),
+                    topPerformer: topPerformer.name,
+                    topScore: isNaN(topPerformer.average) ? '0.0' : (topPerformer.average * 100).toFixed(1),
+                    excellentCount,
+                    excellentPercentage: totalServers > 0 ? ((excellentCount / totalServers) * 100).toFixed(1) : '0.0',
+                    improvementCount
+                };
+            }, [filteredData]);
+
+            // Prepare data for the Radar Chart (average scores per axis)
+            const axisData = useMemo(() => {
+                if (filteredData.length === 0) return [];
+                
+                const axisNames = [
+                    'الجانب الروحي والشخصي',
+                    'الالتزام والانضباط', 
+                    'مهارات الأداء في الخدمة',
+                    'العمل الجماعي والعلاقات',
+                    'النمو والتطوير',
+                    'تقديم الدرس'
+                ];
+                
+                return axisNames.map((name, index) => {
+                    const axisKey = `axis${index + 1}`; // Corresponds to axis1, axis2, etc.
+                    const validValues = filteredData.filter(item => !isNaN(item[axisKey]) && item[axisKey] >= 0);
+                    const avg = validValues.length > 0 
+                        ? validValues.reduce((sum, item) => sum + item[axisKey], 0) / validValues.length 
+                        : 0;
+                    
+                    return {
+                        axis: name,
+                        value: parseFloat((avg * 100).toFixed(1)), // Convert to percentage for display
+                        fullMark: 100 // Max value for radar chart scale
+                    };
+                });
+            }, [filteredData]);
+
+            // Prepare data for the Service Distribution Doughnut Chart
+            const serviceDoughnutData = useMemo(() => {
+                const serviceCounts = {};
+                filteredData.forEach(item => {
+                    const serviceName = item.service || 'غير محدد';
+                    serviceCounts[serviceName] = (serviceCounts[serviceName] || 0) + 1;
+                });
+
+                const labels = Object.keys(serviceCounts);
+                const dataValues = Object.values(serviceCounts);
+
+                return {
+                    labels: labels,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: chartColors.slice(0, labels.length), // Use available colors
+                        borderColor: '#fff',
+                        borderWidth: 2,
+                    }]
+                };
+            }, [filteredData]);
+
+            // Effect hook for rendering the Radar Chart using Chart.js
+            useEffect(() => {
+                if (radarChartRef.current && axisData.length > 0 && typeof Chart !== 'undefined') {
+                    const ctx = radarChartRef.current.getContext('2d');
+
+                    // Destroy existing chart instance if it exists to prevent duplicates
+                    if (chartInstance.current.radar) {
+                        chartInstance.current.radar.destroy();
+                    }
+
+                    // Create new Chart.js Radar Chart
+                    chartInstance.current.radar = new Chart(ctx, {
+                        type: 'radar',
+                        data: {
+                            labels: axisData.map(item => item.axis),
+                            datasets: [{
+                                label: 'متوسط التقييم',
+                                data: axisData.map(item => item.value),
+                                backgroundColor: 'rgba(136, 132, 216, 0.6)', /* Consistent with header gradient */
+                                borderColor: '#6a11cb',
+                                borderWidth: 2,
+                                pointBackgroundColor: '#6a11cb',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: '#6a11cb'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                r: {
+                                    angleLines: {
+                                        color: '#e0e7ff' /* Lighter gray for grid */
+                                    },
+                                    grid: {
+                                        color: '#e0e7ff'
+                                    },
+                                    pointLabels: {
+                                        font: {
+                                            size: 12,
+                                            family: 'Cairo, sans-serif'
+                                        },
+                                        color: '#4b5563'
+                                    },
+                                    suggestedMin: 0,
+                                    suggestedMax: 100,
+                                    ticks: {
+                                        display: false // Hide ticks to keep it clean
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top',
+                                    labels: {
+                                        font: {
+                                            family: 'Cairo, sans-serif'
+                                        },
+                                        color: '#374151'
+                                    }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return `${context.dataset.label}: ${context.raw}%`;
+                                        }
+                                    },
+                                    titleFont: {
+                                        family: 'Cairo, sans-serif'
+                                    },
+                                    bodyFont: {
+                                        family: 'Cairo, sans-serif'
+                                    },
+                                    rtl: true
+                                }
+                            }
+                        }
+                    });
+                }
+                // Cleanup function to destroy chart on component unmount or dependency change
+                return () => {
+                    if (chartInstance.current.radar) {
+                        chartInstance.current.radar.destroy();
+                    }
+                };
+            }, [axisData, activeTab]); // Re-render if axisData or activeTab changes
+
+            // Effect hook for rendering the Doughnut Chart using Chart.js
+            useEffect(() => {
+                if (serviceDoughnutChartRef.current && serviceDoughnutData.labels.length > 0 && typeof Chart !== 'undefined') {
+                    const ctx = serviceDoughnutChartRef.current.getContext('2d');
+
+                    // Destroy existing chart instance if it exists
+                    if (chartInstance.current.doughnut) {
+                        chartInstance.current.doughnut.destroy();
+                    }
+
+                    // Create new Chart.js Doughnut Chart
+                    chartInstance.current.doughnut = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: serviceDoughnutData,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'right', // Position legend to the right
+                                    labels: {
+                                        font: {
+                                            family: 'Cairo, sans-serif', 
+                                        },
+                                        color: '#374151',
+                                    },
+                                    rtl: true, // Enable RTL for legend
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = context.raw;
+                                            const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
+                                            const percentage = ((value / total) * 100).toFixed(1);
+                                            return `${label}: ${value} (${percentage}%)`;
+                                        }
+                                    },
+                                    titleFont: {
+                                        family: 'Cairo, sans-serif'
+                                    },
+                                    bodyFont: {
+                                        family: 'Cairo, sans-serif'
+                                    },
+                                    rtl: true
+                                }
+                            }
+                        }
+                    });
+                }
+                // Cleanup function
+                return () => {
+                    if (chartInstance.current.doughnut) {
+                        chartInstance.current.doughnut.destroy();
+                    }
+                };
+            }, [serviceDoughnutData, activeTab]); // Re-render if serviceDoughnutData or activeTab changes
+
+
+            // Define performance levels and categorize filtered data into them
+            const performanceLevels = useMemo(() => {
+                const levels = [
+                    { label: 'ممتاز', min: 0.9, color: '#10b981', bgColor: 'bg-green-500', iconClass: 'star' },
+                    { label: 'جيد جداً', min: 0.8, max: 0.89, color: '#3b82f6', bgColor: 'bg-blue-500', iconClass: 'chart-line' },
+                    { label: 'جيد', min: 0.7, max: 0.79, color: '#f59e0b', bgColor: 'bg-yellow-500', iconClass: 'book-open' },
+                    { label: 'مقبول', min: 0.6, max: 0.69, color: '#f97316', bgColor: 'bg-orange-500', iconClass: 'users' },
+                    { label: 'ضعيف', min: 0, max: 0.59, color: '#ef4444', bgColor: 'bg-red-500', iconClass: 'exclamation-circle' }
+                ];
+                
+                return levels.map(level => {
+                    const serversInLevel = filteredData.filter(item => 
+                        !isNaN(item.average) &&
+                        item.average >= level.min && 
+                        (!('max' in level) || item.average <= level.max) // Check max if defined
+                    );
+                    
+                    return {
+                        ...level,
+                        count: serversInLevel.length,
+                        percentage: filteredData.length > 0 ? (serversInLevel.length / filteredData.length) * 100 : 0,
+                        servers: serversInLevel // Store the actual servers for the modal display
+                    };
+                });
+            }, [filteredData]); // Recalculate if filteredData changes
+
+            /**
+             * Toggles the expansion state of a server's details.
+             * @param {string} name - The name of the server.
+             */
+            const toggleServerDetails = (name) => {
+                setExpandedServers(prev => ({
+                    ...prev,
+                    [name]: !prev[name]
+                }));
+            };
+
+            /**
+             * Resets all filter and sort selections to their default values.
+             */
+            const resetFilters = () => {
+                setSelectedService('الكل');
+                setSelectedClass('الكل');
+                setSelectedServerFilter('الكل'); 
+                setPerformanceSort('desc'); 
+            };
+
+            /**
+             * Opens the server list modal with servers belonging to a specific performance level.
+             * @param {Object} level - The performance level object.
+             */
+            const openServerListModal = (level) => {
+                setModalContent({ level: level, servers: level.servers });
+                setIsModalOpen(true);
+            };
+
+            /**
+             * Closes the server list modal.
+             */
+            const closeServerListModal = () => {
+                setIsModalOpen(false);
+                setModalContent({ level: null, servers: [] });
+            };
+
+            /**
+             * Generates AI-powered suggestions for server improvement based on their data.
+             * Uses the Gemini API for text generation.
+             * Implements exponential backoff for API retries.
+             * @param {Object} server - The server object for which to generate suggestions.
+             * @returns {Promise<void>}
+             */
+            const generateSuggestionsForServer = async (server) => {
+                setIsGeneratingSuggestions(prev => ({ ...prev, [server.name]: true })); // Set loading state for this server
+                setGeneratedSuggestions(prev => ({ ...prev, [server.name]: '' })); // Clear previous suggestions
+
+                const prompt = `
+                أنا أقيم أداء خادم في خدمة كنسية. بناءً على المعلومات التالية، يرجى تقديم 3-5 اقتراحات محددة وقابلة للتنفيذ لمساعدته على تحسين أدائه. ركز على الجوانب التي يمكن تطويرها بناءً على نقاط الضعف والملاحظات.
+                
+                اسم الخادم: ${server.name}
+                الخدمة: ${server.service}
+                الفصل: ${server.class}
+                نقاط القوة: ${server.strengths || 'لا توجد'}
+                نقاط الضعف: ${server.weaknesses || 'لا توجد'}
+                ملاحظات الأمين: ${server.notes || 'لا توجد'}
+                
+                يرجى تقديم الاقتراحات في شكل قائمة نقطية.
                 `;
-            });
-        }
+
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // API key is provided by the environment if empty
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                let retries = 0;
+                const maxRetries = 5;
+                let delay = 1000; // Initial delay of 1 second
+
+                while (retries < maxRetries) {
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            if (response.status === 429) { // Too Many Requests (rate limiting)
+                                throw new Error('Too Many Requests');
+                            }
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const result = await response.json();
+                        if (result.candidates && result.candidates.length > 0 &&
+                            result.candidates[0].content && result.candidates[0].content.parts &&
+                            result.candidates[0].content.parts.length > 0) {
+                            const text = result.candidates[0].content.parts[0].text;
+                            setGeneratedSuggestions(prev => ({ ...prev, [server.name]: text }));
+                            break; // Success, exit retry loop
+                        } else {
+                            throw new Error('Unexpected API response structure or missing content');
+                        }
+                    } catch (error) {
+                        console.error(`Error generating suggestions for ${server.name}:`, error);
+                        retries++;
+                        if (retries < maxRetries) {
+                            await new Promise(res => setTimeout(res, delay)); // Wait before retrying
+                            delay *= 2; // Exponential backoff
+                        } else {
+                            // Max retries reached, display error message
+                            window.showMessage('error', `حدث خطأ أثناء توليد الاقتراحات للخادم ${server.name}. يرجى المحاولة مرة أخرى.`);
+                            setGeneratedSuggestions(prev => ({ ...prev, [server.name]: 'تعذر توليد الاقتراحات.' }));
+                        }
+                    }
+                }
+                setIsGeneratingSuggestions(prev => ({ ...prev, [server.name]: false })); // Reset loading state
+            };
+
+            /**
+             * Renders the doughnut chart for service distribution.
+             * @returns {JSX.Element} The doughnut chart component or a message if no data.
+             */
+            const renderServiceDistributionChart = () => {
+                if (serviceDoughnutData.labels.length === 0) {
+                    return <div className="text-center py-8 text-gray-500">لا توجد بيانات</div>;
+                }
+                return (
+                    <div className="bg-gradient-to-br from-white to-gray-50 p-6 rounded-2xl shadow-lg border border-gray-100 mt-8">
+                        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                            <i className="fas fa-chart-pie fa-fw ml-2 text-xl"></i>
+                            التوزيع حسب نوع الخدمة
+                        </h2>
+                        <div style={{ height: '300px' }}>
+                            <canvas ref={serviceDoughnutChartRef}></canvas>
+                        </div>
+                    </div>
+                );
+            };
+
+            /**
+             * Renders the performance levels section with counts and percentages.
+             * @returns {JSX.Element} The performance levels section or null if no data.
+             */
+            const renderPerformanceLevels = () => {
+                if (performanceLevels.length === 0) {
+                    return null;
+                }
+                return (
+                    <div className="bg-gradient-to-br from-white to-gray-50 p-6 rounded-xl shadow-lg border border-gray-100 mb-6">
+                        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                            <i className="fas fa-chart-bar fa-fw ml-2 text-xl"></i>
+                            توزيع الدرجات حسب المستويات
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                            {performanceLevels.map((level, index) => (
+                                <button 
+                                    key={index} 
+                                    onClick={() => openServerListModal(level)}
+                                    className="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm border border-gray-100 transform transition-all duration-200 hover:scale-105 hover:shadow-md cursor-pointer"
+                                >
+                                    <div 
+                                        className="w-16 h-16 rounded-full flex items-center justify-center mb-2"
+                                        style={{ backgroundColor: level.color + '20', border: `2px solid ${level.color}` }}
+                                    >
+                                        <span className="font-bold text-lg" style={{ color: level.color }}>
+                                            {level.count}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center mb-1">
+                                        <i className={`fas fa-${level.iconClass} fa-fw mr-1 text-lg`}></i>
+                                        <p className="text-center font-medium">{level.label}</p>
+                                    </div>
+                                    <p className="text-gray-600">{level.percentage.toFixed(1)}%</p>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                );
+            };
+
+
+            /**
+             * React component for rendering a dynamic Mind Map using SVG.
+             * Displays filtered data categories and sample items.
+             * @param {Object} props - Component props.
+             * @param {Array<Object>} props.data - The filtered data to display in the mind map.
+             */
+            const MindMap = ({ data }) => { 
+                const svgRef = useRef(null);
+                const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+
+                // Effect to update SVG dimensions on window resize
+                useEffect(() => {
+                    const updateDimensions = () => {
+                        if (svgRef.current && svgRef.current.parentElement) {
+                            setDimensions({
+                                width: svgRef.current.parentElement.clientWidth,
+                                height: Math.max(600, svgRef.current.parentElement.clientHeight) // Minimum height
+                            });
+                        }
+                    };
+                    updateDimensions(); // Initial dimensions
+                    window.addEventListener('resize', updateDimensions); // Add resize listener
+                    return () => window.removeEventListener('resize', updateDimensions); // Cleanup
+                }, []);
+
+                const nodes = [];
+                const links = [];
+
+                // Central node: Evaluation
+                const centerNode = { id: 'evaluation', label: 'التقييم', x: dimensions.width / 2, y: dimensions.height / 2 };
+                nodes.push(centerNode);
+
+                // Level 1 nodes (main categories)
+                const level1Nodes = [
+                    { id: 'classes', label: 'الفصول', xOffset: -200, yOffset: -100 },
+                    { id: 'services', label: 'نوع الخدمة', xOffset: -200, yOffset: 100 },
+                    { id: 'axes', label: 'المحاور الرئيسية للتقييم', xOffset: 200, yOffset: -100 },
+                    { id: 'servers', label: 'الخدام', xOffset: 200, yOffset: 100 }
+                ];
+
+                level1Nodes.forEach(node => {
+                    const x = centerNode.x + node.xOffset;
+                    const y = centerNode.y + node.yOffset;
+                    nodes.push({ id: node.id, label: node.label, x, y });
+                    links.push({ source: centerNode, target: { x, y, id: node.id } });
+                });
+
+                // Dynamically generate Level 2 nodes from filtered data
+                // Get unique values for classes, services, and server names
+                const uniqueClassNodes = Array.from(new Set(data.map(d => d.class))).filter(c => c && c !== 'غير محدد');
+                const uniqueServiceNodes = Array.from(new Set(data.map(d => d.service))).filter(s => s && s !== 'غير محدد');
+                const axisNames = [
+                    'الجانب الروحي والشخصي', 'الالتزام والانضباط', 'مهارات الأداء في الخدمة',
+                    'العمل الجماعي والعلاقات', 'النمو والتطوير', 'تقديم الدرس'
+                ];
+                const uniqueServerNames = Array.from(new Set(data.map(d => d.name))).filter(n => n && n.trim() !== '');
+
+                /**
+                 * Helper function to add sub-nodes to the mind map.
+                 * @param {string} parentNodeId - The ID of the parent node.
+                 * @param {Array<string>} subNodesArray - Array of labels for sub-nodes.
+                 * @param {number} startXOffset - X offset from parent.
+                 * @param {number} startYOffset - Y offset from parent.
+                 * @param {number} spacingY - Vertical spacing between sub-nodes.
+                 * @param {number} parentX - X coordinate of the parent node.
+                 * @param {number} parentY - Y coordinate of the parent node.
+                 */
+                const addSubNodes = (parentNodeId, subNodesArray, startXOffset, startYOffset, spacingY, parentX, parentY) => {
+                    subNodesArray.forEach((subLabel, index) => {
+                        const subNodeId = `${parentNodeId}-${subLabel}`;
+                        const x = parentX + startXOffset;
+                        const y = parentY + startYOffset + index * spacingY;
+                        nodes.push({ id: subNodeId, label: subLabel, x, y });
+                        links.push({ source: nodes.find(n => n.id === parentNodeId), target: { x, y, id: subNodeId } });
+                    });
+                };
+
+                // Add class sub-nodes (limit to 5 for visual clarity)
+                const classesParent = nodes.find(n => n.id === 'classes');
+                if (classesParent) {
+                    addSubNodes('classes', uniqueClassNodes.slice(0, 5), -100, -50, 40, classesParent.x, classesParent.y);
+                }
+
+                // Add service sub-nodes (limit to 5 for visual clarity)
+                const servicesParent = nodes.find(n => n.id === 'services');
+                if (servicesParent) {
+                    addSubNodes('services', uniqueServiceNodes.slice(0, 5), -100, -50, 40, servicesParent.x, servicesParent.y);
+                }
+
+                // Add axes sub-nodes (all 6 axes)
+                const axesParent = nodes.find(n => n.id === 'axes');
+                if (axesParent) {
+                    addSubNodes('axes', axisNames, 100, -50, 40, axesParent.x, axesParent.y);
+                }
+
+                // Add a few server name examples (limit to 3 for visual clarity)
+                const serversParent = nodes.find(n => n.id === 'servers');
+                if (serversParent) {
+                    addSubNodes('servers', uniqueServerNames.slice(0, 3), 100, -50, 40, serversParent.x, serversParent.y);
+                }
+
+                return (
+                    <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 h-full min-h-[600px] flex items-center justify-center">
+                        <svg ref={svgRef} width="100%" height="100%" viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}>
+                            <defs>
+                                {/* Define shadow filter for nodes */}
+                                <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                                    <feDropShadow dx="2" dy="2" stdDeviation="3" floodColor="#000" floodOpacity="0.2"/>
+                                </filter>
+                            </defs>
+                            {/* Render links (lines connecting nodes) */}
+                            {links.map((link, index) => (
+                                <line 
+                                    key={index}
+                                    x1={link.source.x} y1={link.source.y}
+                                    x2={link.target.x} y2={link.target.y}
+                                    className="mind-map-line"
+                                />
+                            ))}
+                            {/* Render nodes (rectangles with text) */}
+                            {nodes.map((node, index) => {
+                                // Calculate rectangle dimensions based on text length
+                                const textWidth = node.label.length * 8 + (node.icon ? 30 : 20); 
+                                const rectWidth = Math.max(100, textWidth);
+                                const rectHeight = 35;
+                                const rectX = node.x - rectWidth / 2;
+                                const rectY = node.y - rectHeight / 2;
+                                return (
+                                    <g key={index}>
+                                        <rect 
+                                            x={rectX} y={rectY} 
+                                            width={rectWidth} height={rectHeight} 
+                                            className="mind-map-rect"
+                                            style={{ filter: 'url(#shadow)' }} // Apply shadow filter
+                                        />
+                                        <text x={node.x} y={node.y + 5} className="mind-map-node">
+                                            {node.label}
+                                        </text>
+                                    </g>
+                                );
+                            })}
+                        </svg>
+                    </div>
+                );
+            };
+
+
+            return (
+                <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100" dir="rtl">
+                    {/* Navigation Header */}
+                    <header className="bg-gradient-to-r from-purple-800 to-indigo-900 text-white shadow-lg">
+                        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+                            <div className="flex items-center">
+                                <div className="bg-white p-2 rounded-full mr-3 shadow-md">
+                                    <i className="fas fa-star text-purple-700 text-2xl"></i>
+                                </div>
+                                <h1 className="text-2xl font-bold">لوحة تقييم الخدام</h1>
+                            </div>
+                            <div className="flex space-x-4 tab-buttons">
+                                {/* Dashboard Tab Button */}
+                                <button 
+                                    className={`px-4 py-2 rounded-lg flex items-center font-medium transition-all duration-200 ${activeTab === 'dashboard' ? 'bg-white text-purple-700 shadow-md' : 'text-white hover:bg-white/20'}`}
+                                    onClick={() => setActiveTab('dashboard')}
+                                >
+                                    <i className="fas fa-chart-bar fa-fw ml-2 text-lg"></i>
+                                    الإحصائيات
+                                </button>
+                                {/* Servers List Tab Button */}
+                                <button 
+                                    className={`px-4 py-2 rounded-lg flex items-center font-medium transition-all duration-200 ${activeTab === 'servers' ? 'bg-white text-purple-700 shadow-md' : 'text-white hover:bg-white/20'}`}
+                                    onClick={() => setActiveTab('servers')}
+                                >
+                                    <i className="fas fa-users fa-fw ml-2 text-lg"></i>
+                                    قائمة الخدام
+                                </button>
+                                {/* Mind Map Tab Button */}
+                                <button 
+                                    className={`px-4 py-2 rounded-lg flex items-center font-medium transition-all duration-200 ${activeTab === 'mindmap' ? 'bg-white text-purple-700 shadow-md' : 'text-white hover:bg-white/20'}`}
+                                    onClick={() => setActiveTab('mindmap')}
+                                >
+                                    <i className="fas fa-sitemap fa-fw ml-2 text-lg"></i>
+                                    خريطة ذهنية
+                                </button>
+                            </div>
+                            {/* Print/Save PDF Button */}
+                            <div className="print-button-container">
+                                <button 
+                                    onClick={() => window.print()}
+                                    className="px-4 py-2 rounded-lg flex items-center font-medium bg-white text-purple-700 shadow-md hover:bg-gray-100 transition-all duration-200"
+                                >
+                                    <i className="fas fa-print fa-fw ml-2 text-lg"></i>
+                                    طباعة / حفظ PDF
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Main Content Area */}
+                    <main className="container mx-auto px-4 py-8">
+                        {loading ? (
+                            // Loading spinner when data is being processed
+                            <div className="flex justify-center items-center h-64">
+                                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-500"></div>
+                            </div>
+                        ) : (
+                            <>
+                                {/* Filter Section */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 filter-section">
+                                    {/* Service Type Filter */}
+                                    <div className="bg-gradient-to-br from-white to-gray-50 p-4 rounded-xl shadow-md border border-gray-100">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                                            <i className="fas fa-tag fa-fw ml-2 text-lg text-purple-600"></i>
+                                            نوع الخدمة
+                                        </label>
+                                        <div className="relative">
+                                            <select 
+                                                value={selectedService}
+                                                onChange={(e) => setSelectedService(e.target.value)}
+                                                className="w-full p-3 border border-gray-300 rounded-lg appearance-none pr-10 bg-white text-gray-800 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                                            >
+                                                {services.map(service => (
+                                                    <option key={service} value={service}>{service}</option>
+                                                ))}
+                                            </select>
+                                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                                                <i className="fas fa-chevron-down fa-fw text-sm"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Class Filter */}
+                                    <div className="bg-gradient-to-br from-white to-gray-50 p-4 rounded-xl shadow-md border border-gray-100">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                                            <i className="fas fa-school fa-fw ml-2 text-lg text-purple-600"></i>
+                                            الفصل
+                                        </label>
+                                        <div className="relative">
+                                            <select 
+                                                value={selectedClass}
+                                                onChange={(e) => setSelectedClass(e.target.value)}
+                                                className="w-full p-3 border border-gray-300 rounded-lg appearance-none pr-10 bg-white text-gray-800 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                                            >
+                                                {classesForService.map(cls => (
+                                                    <option key={cls} value={cls}>{cls}</option>
+                                                ))}
+                                            </select>
+                                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                                                <i className="fas fa-chevron-down fa-fw text-sm"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Server Name Filter */}
+                                    <div className="bg-gradient-to-br from-white to-gray-50 p-4 rounded-xl shadow-md border border-gray-100">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                                            <i className="fas fa-user-circle fa-fw ml-2 text-lg text-purple-600"></i>
+                                            فلتر باسم الخادم
+                                        </label>
+                                        <div className="relative">
+                                            <select 
+                                                value={selectedServerFilter}
+                                                onChange={(e) => setSelectedServerFilter(e.target.value)}
+                                                className="w-full p-3 border border-gray-300 rounded-lg appearance-none pr-10 bg-white text-gray-800 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                                            >
+                                                {serverNames.map(name => (
+                                                    <option key={name} value={name}>{name}</option>
+                                                ))}
+                                            </select>
+                                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                                                <i className="fas fa-chevron-down fa-fw text-sm"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Reset Filters Button */}
+                                    <div className="flex items-end">
+                                        <button 
+                                            onClick={resetFilters}
+                                            className="w-full py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg flex items-center justify-center font-medium transition-all duration-200 transform hover:scale-102 shadow-md"
+                                        >
+                                            <i className="fas fa-sync-alt fa-fw ml-2 text-lg"></i>
+                                            إعادة تعيين الفلاتر
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Conditional rendering based on activeTab */}
+                                {activeTab === 'dashboard' ? (
+                                    <>
+                                        {/* General Statistics Section */}
+                                        {statistics && statistics.totalServers > 0 ? (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                                                {/* Total Servers Card */}
+                                                <div className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-2xl shadow-lg border border-gray-100 flex items-center transform transition-all duration-300 hover:scale-102 hover:shadow-xl">
+                                                    <div className="bg-blue-100 p-3 rounded-xl mr-4 flex-shrink-0">
+                                                        <i className="fas fa-users text-blue-600 text-3xl"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-500 text-sm">عدد الخدام</p>
+                                                        <p className="text-2xl font-bold text-gray-800">{statistics.totalServers}</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* Average Score Card */}
+                                                <div className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-2xl shadow-lg border border-gray-100 flex items-center transform transition-all duration-300 hover:scale-102 hover:shadow-xl">
+                                                    <div className="bg-green-100 p-3 rounded-xl mr-4 flex-shrink-0">
+                                                        <i className="fas fa-chart-line text-green-600 text-3xl"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-500 text-sm">متوسط التقييم</p>
+                                                        <p className="text-2xl font-bold text-gray-800">{statistics.avgScore}%</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* Top Performer Card */}
+                                                <div className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-2xl shadow-lg border border-gray-100 flex items-center transform transition-all duration-300 hover:scale-102 hover:shadow-xl">
+                                                    <div className="bg-yellow-100 p-3 rounded-xl mr-4 flex-shrink-0">
+                                                        <i className="fas fa-trophy text-yellow-600 text-3xl"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-500 text-sm">أعلى تقييم</p>
+                                                        <p className="text-xl font-bold text-gray-800 truncate" title={statistics.topPerformer}>{statistics.topPerformer}</p>
+                                                        <p className="text-gray-600 text-sm">{statistics.topScore}%</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* Excellent Servers Count Card */}
+                                                <div className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-2xl shadow-lg border border-gray-100 flex items-center transform transition-all duration-300 hover:scale-102 hover:shadow-xl">
+                                                    <div className="bg-purple-100 p-3 rounded-xl mr-4 flex-shrink-0">
+                                                        <i className="fas fa-star text-purple-600 text-3xl"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-500 text-sm">ممتاز</p>
+                                                        <p className="text-2xl font-bold text-gray-800">{statistics.excellentCount} خدام</p>
+                                                        <p className="text-gray-600 text-sm">{statistics.excellentPercentage}%</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            // Message when no data matches filters
+                                            <div className="bg-gradient-to-br from-white to-gray-50 p-8 rounded-xl shadow-lg border border-gray-100 text-center mb-8">
+                                                <i className="fas fa-exclamation-triangle fa-fw mx-auto text-gray-400 mb-4 text-5xl"></i>
+                                                <h3 className="text-xl font-bold text-gray-700">لا توجد بيانات</h3>
+                                                <p className="text-gray-500">لم يتم العثور على بيانات مطابقة للفلاتر المحددة.</p>
+                                                <button 
+                                                    onClick={resetFilters}
+                                                    className="mt-6 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-md"
+                                                >
+                                                    إعادة تعيين الفلاتر
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {/* Charts Section */}
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                                            {/* Radar Chart for Axis Evaluation */}
+                                            <div className="bg-gradient-to-br from-white to-gray-50 p-6 rounded-2xl shadow-lg border border-gray-100">
+                                                <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                                                    <i className="fas fa-chart-area fa-fw ml-2 text-xl"></i>
+                                                    متوسط التقييم حسب المحاور
+                                                </h2>
+                                                {axisData.length > 0 ? (
+                                                    <div style={{ height: '300px' }}> 
+                                                        <canvas ref={radarChartRef}></canvas>
+                                                    </div>
+                                                ) : (
+                                                    <div className="h-64 flex items-center justify-center text-gray-500">
+                                                        لا توجد بيانات لعرض الرسم البياني.
+                                                    </div>
+                                                )}
+                                            </div>
+                                            
+                                            {/* Top/Bottom 15 Servers List */}
+                                            <div className="bg-gradient-to-br from-white to-gray-50 p-6 rounded-2xl shadow-lg border border-gray-100">
+                                                <div className="flex justify-between items-center mb-4">
+                                                    <h2 className="text-xl font-bold text-gray-800 flex items-center">
+                                                        <i className="fas fa-medal fa-fw ml-2 text-xl"></i>
+                                                        أداء الخدام (الأعلى/الأدنى 15)
+                                                    </h2>
+                                                    <div className="flex space-x-2 bg-gray-100 rounded-lg p-1 shadow-inner">
+                                                        <button 
+                                                            className={`px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 ${performanceSort === 'desc' ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200'}`}
+                                                            onClick={() => setPerformanceSort('desc')}
+                                                        >
+                                                            الأعلى
+                                                        </button>
+                                                        <button 
+                                                            className={`px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 ${performanceSort === 'asc' ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200'}`}
+                                                            onClick={() => setPerformanceSort('asc')}
+                                                        >
+                                                            الأدنى
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                {filteredData.length > 0 ? ( 
+                                                    <div className="h-[300px] overflow-y-auto pr-2">
+                                                        {filteredData.slice(0, 15).map((server, index) => ( 
+                                                            <div key={index} className="flex items-center mb-4 p-3 hover:bg-gray-100 rounded-lg transition-colors duration-150">
+                                                                <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-3 flex-shrink-0">
+                                                                    <span className="font-bold text-purple-700">{index + 1}</span>
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="font-medium text-gray-800 truncate" title={server.fullName || server.name}>{server.fullName || server.name}</p>
+                                                                    <p className="text-sm text-gray-500 truncate">{server.service} - {server.class}</p>
+                                                                </div>
+                                                                <div className="w-24 bg-gray-200 rounded-full h-2.5 mr-3">
+                                                                    <div 
+                                                                        className="h-2.5 rounded-full transition-all duration-500 ease-out" 
+                                                                        style={{ 
+                                                                            width: `${(server.average || 0) * 100}%`,
+                                                                            backgroundColor: 
+                                                                                (server.average || 0) >= 0.9 ? '#10b981' :
+                                                                                (server.average || 0) >= 0.8 ? '#3b82f6' :
+                                                                                (server.average || 0) >= 0.7 ? '#f59e0b' :
+                                                                                (server.average || 0) >= 0.6 ? '#f97316' : '#ef4444'
+                                                                        }}
+                                                                    ></div>
+                                                                </div>
+                                                                <span className="font-bold w-14 text-gray-800 text-sm">{((server.average || 0) * 100).toFixed(1)}%</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <div className="h-64 flex items-center justify-center text-gray-500">
+                                                        لا توجد بيانات لعرض أفضل/أسوأ الخدام.
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Performance Levels Distribution */}
+                                        {performanceLevels.length > 0 && renderPerformanceLevels()}
+
+                                        {/* Service Distribution Doughnut Chart */}
+                                        {serviceDoughnutData.labels.length > 0 && renderServiceDistributionChart()}
+                                    </>
+                                ) : activeTab === 'servers' ? (
+                                    <>
+                                        {/* Servers List Header with View Mode and Sort Options */}
+                                        <div className="flex justify-between items-center mb-6">
+                                            <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+                                                <i className="fas fa-list-alt fa-fw ml-2 text-xl"></i>
+                                                قائمة الخدام ({filteredData.length})
+                                            </h2>
+                                            
+                                            <div className="flex items-center space-x-4">
+                                                {/* View Mode Toggle */}
+                                                <div className="flex items-center">
+                                                    <label className="mr-2 text-gray-700 font-medium">طريقة العرض:</label>
+                                                    <div className="flex bg-gray-200 rounded-lg overflow-hidden shadow-inner">
+                                                        <button 
+                                                            className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${viewMode === 'grid' ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-300'}`}
+                                                            onClick={() => setViewMode('grid')}
+                                                        >
+                                                            شبكة
+                                                        </button>
+                                                        <button 
+                                                            className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${viewMode === 'list' ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-300'}`}
+                                                            onClick={() => setViewMode('list')}
+                                                        >
+                                                            قائمة
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* Performance Sort Toggle */}
+                                                <div className="flex items-center">
+                                                    <label className="mr-2 text-gray-700 font-medium">الترتيب:</label>
+                                                    <div className="flex bg-gray-200 rounded-lg overflow-hidden shadow-inner">
+                                                        <button 
+                                                            className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${performanceSort === 'desc' ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-300'}`}
+                                                            onClick={() => setPerformanceSort('desc')}
+                                                        >
+                                                            الأعلى
+                                                        </button>
+                                                        <button 
+                                                            className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${performanceSort === 'asc' ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-300'}`}
+                                                            onClick={() => setPerformanceSort('asc')}
+                                                        >
+                                                            الأدنى
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Conditional rendering for Grid or List view */}
+                                        {filteredData.length === 0 ? (
+                                            // Message when no servers match filters
+                                            <div className="bg-gradient-to-br from-white to-gray-50 p-8 rounded-xl shadow-lg border border-gray-100 text-center">
+                                                <i className="fas fa-exclamation-triangle fa-fw mx-auto text-gray-400 mb-4 text-5xl"></i>
+                                                <h3 className="text-xl font-bold text-gray-700">لا توجد بيانات</h3>
+                                                <p className="text-gray-500">لم يتم العثور على خدام مطابقين للفلاتر المحددة.</p>
+                                                <button 
+                                                    onClick={resetFilters}
+                                                    className="mt-6 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-md"
+                                                >
+                                                    إعادة تعيين الفلاتر
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            viewMode === 'grid' ? (
+                                                // Grid View for Servers
+                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                                    {filteredData.map((server, index) => (
+                                                        <div key={index} className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-100 overflow-hidden transform transition-all duration-300 hover:scale-102 hover:shadow-xl">
+                                                            <div className="p-6">
+                                                                <div className="flex justify-between items-start mb-4">
+                                                                    <div>
+                                                                        <h3 className="font-bold text-lg text-gray-800 mb-1 truncate" title={server.fullName || server.name}>
+                                                                            {server.fullName || server.name}
+                                                                        </h3>
+                                                                        <div className="flex flex-wrap gap-2">
+                                                                            <span className="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-medium">
+                                                                                {server.service}
+                                                                            </span>
+                                                                            <span className="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-medium">
+                                                                                {server.class}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="bg-indigo-100 text-indigo-800 font-bold px-4 py-2 rounded-full text-sm flex-shrink-0">
+                                                                        {(server.average * 100).toFixed(1)}%
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <div className="mt-4">
+                                                                    <div className="flex items-center justify-between mb-2">
+                                                                        <span className="text-sm text-gray-600">مستوى الأداء</span>
+                                                                        <span className="text-xs font-bold" style={{ 
+                                                                            color: server.average >= 0.9 ? '#10b981' :
+                                                                            server.average >= 0.8 ? '#3b82f6' :
+                                                                            server.average >= 0.7 ? '#f59e0b' :
+                                                                            server.average >= 0.6 ? '#f97316' : '#ef4444'
+                                                                        }}>
+                                                                            {server.average >= 0.9 ? 'ممتاز' :
+                                                                            server.average >= 0.8 ? 'جيد جداً' :
+                                                                            server.average >= 0.7 ? 'جيد' :
+                                                                            server.average >= 0.6 ? 'مقبول' : 'ضعيف'}
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className="w-full bg-gray-200 rounded-full h-3">
+                                                                        <div 
+                                                                            className="h-3 rounded-full transition-all duration-500 ease-out" 
+                                                                            style={{ 
+                                                                                width: `${(server.average || 0) * 100}%`,
+                                                                                backgroundColor: 
+                                                                                (server.average || 0) >= 0.9 ? '#10b981' :
+                                                                                (server.average || 0) >= 0.8 ? '#3b82f6' :
+                                                                                (server.average || 0) >= 0.7 ? '#f59e0b' :
+                                                                                (server.average || 0) >= 0.6 ? '#f97316' : '#ef4444'
+                                                                            }}
+                                                                        ></div>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <button 
+                                                                    onClick={() => toggleServerDetails(server.name)}
+                                                                    className="w-full mt-6 py-2 text-indigo-600 hover:text-indigo-800 flex items-center justify-center font-medium rounded-lg bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
+                                                                >
+                                                                    {expandedServers[server.name] ? 'إخفاء التفاصيل' : 'عرض التفاصيل'}
+                                                                    {expandedServers[server.name] ? <i className="fas fa-chevron-up fa-fw ml-1 text-sm"></i> : <i className="fas fa-chevron-down fa-fw ml-1 text-sm"></i>}
+                                                                </button>
+                                                            </div>
+                                                            
+                                                            {expandedServers[server.name] && (
+                                                                <div className="bg-gray-50 p-6 border-t border-gray-100">
+                                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                        <div>
+                                                                            <h3 className="font-semibold text-green-700 mb-2 flex items-center">
+                                                                                <i className="fas fa-check-circle fa-fw ml-2 text-xl"></i>
+                                                                                نقاط القوة:
+                                                                            </h3>
+                                                                            <p className="text-gray-700 bg-green-50 p-3 rounded-lg text-sm whitespace-pre-wrap">{server.strengths || 'لا يوجد'}</p>
+                                                                        </div>
+                                                                        <div>
+                                                                            <h3 className="font-semibold text-red-700 mb-2 flex items-center">
+                                                                                <i className="fas fa-times-circle fa-fw ml-2 text-xl"></i>
+                                                                                نقاط الضعف:
+                                                                            </h3>
+                                                                            <p className="text-gray-700 bg-red-50 p-3 rounded-lg text-sm whitespace-pre-wrap">{server.weaknesses || 'لا يوجد'}</p>
+                                                                        </div>
+                                                                        <div className="md:col-span-2">
+                                                                            <h3 className="font-semibold text-gray-700 mb-2 flex items-center">
+                                                                                <i className="fas fa-sticky-note fa-fw ml-2 text-xl"></i>
+                                                                                ملاحظات:
+                                                                            </h3>
+                                                                            <p className="text-gray-700 bg-gray-100 p-3 rounded-lg text-sm whitespace-pre-wrap">{server.notes || 'لا يوجد'}</p>
+                                                                        </div>
+                                                                        <div className="col-span-full">
+                                                                            <button
+                                                                                onClick={() => generateSuggestionsForServer(server)}
+                                                                                className="w-full py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-300 transform hover:scale-105 shadow-md flex items-center justify-center"
+                                                                                disabled={isGeneratingSuggestions[server.name]}
+                                                                            >
+                                                                                {isGeneratingSuggestions[server.name] ? (
+                                                                                    <>
+                                                                                        <i className="fas fa-spinner fa-spin ml-2"></i>
+                                                                                        جاري التوليد...
+                                                                                    </>
+                                                                                ) : (
+                                                                                    <>
+                                                                                        <i className="fas fa-magic ml-2"></i>
+                                                                                        ✨ اقتراحات تحسين ✨
+                                                                                    </>
+                                                                                )}
+                                                                            </button>
+                                                                            {generatedSuggestions[server.name] && (
+                                                                                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200 text-blue-800 text-sm whitespace-pre-wrap">
+                                                                                    <h4 className="font-bold mb-2 flex items-center">
+                                                                                        <i className="fas fa-lightbulb ml-2"></i>
+                                                                                        اقتراحات الذكاء الاصطناعي:
+                                                                                        <button onClick={() => setGeneratedSuggestions(prev => ({ ...prev, [server.name]: '' }))} className="mr-2 text-blue-600 hover:text-blue-800 text-xs">
+                                                                                            <i className="fas fa-times-circle"></i> مسح
+                                                                                        </button>
+                                                                                    </h4>
+                                                                                    {generatedSuggestions[server.name]}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                                                    <div className="overflow-x-auto">
+                                                        <table className="min-w-full divide-y divide-gray-200">
+                                                            <thead className="bg-gray-50">
+                                                                <tr>
+                                                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-600 uppercase tracking-wider">الاسم</th>
+                                                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-600 uppercase tracking-wider">الخدمة</th>
+                                                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-600 uppercase tracking-wider">الفصل</th>
+                                                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-600 uppercase tracking-wider">التقييم</th>
+                                                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-600 uppercase tracking-wider">التفاصيل</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody className="bg-white divide-y divide-gray-200">
+                                                                {filteredData.map((server, index) => (
+                                                                    <React.Fragment key={index}>
+                                                                        <tr className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors duration-150`}>
+                                                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" title={server.fullName || server.name}>
+                                                                                {server.fullName || server.name}
+                                                                            </td>
+                                                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{server.service}</td>
+                                                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{server.class}</td>
+                                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                                <div className="flex items-center">
+                                                                                    <div className="w-24 bg-gray-200 rounded-full h-2.5 mr-2">
+                                                                                        <div 
+                                                                                            className="h-2.5 rounded-full transition-all duration-500 ease-out" 
+                                                                                            style={{ 
+                                                                                                width: `${(server.average || 0) * 100}%`,
+                                                                                                backgroundColor: 
+                                                                                                    (server.average || 0) >= 0.9 ? '#10b981' :
+                                                                                                    (server.average || 0) >= 0.8 ? '#3b82f6' :
+                                                                                                    (server.average || 0) >= 0.7 ? '#f59e0b' :
+                                                                                                    (server.average || 0) >= 0.6 ? '#f97316' : '#ef4444'
+                                                                                            }}
+                                                                                        ></div>
+                                                                                    </div>
+                                                                                    <span className="text-sm font-bold text-gray-800">
+                                                                                        {((server.average || 0) * 100).toFixed(1)}%
+                                                                                    </span>
+                                                                                </div>
+                                                                            </td>
+                                                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                                                                <button 
+                                                                                    onClick={() => toggleServerDetails(server.name)}
+                                                                                    className="text-indigo-600 hover:text-indigo-800 flex items-center font-medium transition-colors duration-200"
+                                                                                >
+                                                                                    {expandedServers[server.name] ? 'إخفاء التفاصيل' : 'عرض التفاصيل'}
+                                                                                    {expandedServers[server.name] ? <i className="fas fa-chevron-up fa-fw ml-1 text-sm"></i> : <i className="fas fa-chevron-down fa-fw ml-1 text-sm"></i>}
+                                                                                </button>
+                                                                            </td>
+                                                                        </tr>
+                                                                        {expandedServers[server.name] && (
+                                                                            <tr>
+                                                                                <td colSpan="5" className="px-6 py-4 bg-gray-100">
+                                                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                                        <div>
+                                                                                            <h3 className="font-semibold text-green-700 mb-2 flex items-center">
+                                                                                                <i className="fas fa-check-circle fa-fw ml-2 text-xl"></i>
+                                                                                                نقاط القوة:
+                                                                                            </h3>
+                                                                                            <p className="text-gray-700 bg-green-50 p-3 rounded-lg text-sm whitespace-pre-wrap">{server.strengths || 'لا يوجد'}</p>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <h3 className="font-semibold text-red-700 mb-2 flex items-center">
+                                                                                                <i className="fas fa-times-circle fa-fw ml-2 text-xl"></i>
+                                                                                                نقاط الضعف:
+                                                                                            </h3>
+                                                                                            <p className="text-gray-700 bg-red-50 p-3 rounded-lg text-sm whitespace-pre-wrap">{server.weaknesses || 'لا يوجد'}</p>
+                                                                                        </div>
+                                                                                        <div className="md:col-span-2">
+                                                                                            <h3 className="font-semibold text-gray-700 mb-2 flex items-center">
+                                                                                                <i className="fas fa-sticky-note fa-fw ml-2 text-xl"></i>
+                                                                                                ملاحظات:
+                                                                                            </h3>
+                                                                                            <p className="text-gray-700 bg-gray-100 p-3 rounded-lg text-sm whitespace-pre-wrap">{server.notes || 'لا يوجد'}</p>
+                                                                                        </div>
+                                                                                        <div className="col-span-full">
+                                                                                            <button
+                                                                                                onClick={() => generateSuggestionsForServer(server)}
+                                                                                                className="w-full py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-300 transform hover:scale-105 shadow-md flex items-center justify-center"
+                                                                                                disabled={isGeneratingSuggestions[server.name]}
+                                                                                            >
+                                                                                                {isGeneratingSuggestions[server.name] ? (
+                                                                                                    <>
+                                                                                                        <i className="fas fa-spinner fa-spin ml-2"></i>
+                                                                                                        جاري التوليد...
+                                                                                                    </>
+                                                                                                ) : (
+                                                                                                    <>
+                                                                                                        <i className="fas fa-magic ml-2"></i>
+                                                                                                        ✨ اقتراحات تحسين ✨
+                                                                                                    </>
+                                                                                                )}
+                                                                                            </button>
+                                                                                            {generatedSuggestions[server.name] && (
+                                                                                                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200 text-blue-800 text-sm whitespace-pre-wrap">
+                                                                                                    <h4 className="font-bold mb-2 flex items-center">
+                                                                                                        <i className="fas fa-lightbulb ml-2"></i>
+                                                                                                        اقتراحات الذكاء الاصطناعي:
+                                                                                                        <button onClick={() => setGeneratedSuggestions(prev => ({ ...prev, [server.name]: '' }))} className="mr-2 text-blue-600 hover:text-blue-800 text-xs">
+                                                                                                            <i className="fas fa-times-circle"></i> مسح
+                                                                                                        </button>
+                                                                                                    </h4>
+                                                                                                    {generatedSuggestions[server.name]}
+                                                                                                </div>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                        )}
+                                                                    </React.Fragment>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            )
+                                        )}
+                                    </>
+                                ) : activeTab === 'mindmap' ? (
+                                    <MindMap data={filteredData} /> 
+                                ) : null}
+                            </>
+                        )}
+                    </main>
+                    {/* Server List Modal */}
+                    {isModalOpen && (
+                        <ServerListModal 
+                            isOpen={isModalOpen} 
+                            onClose={closeServerListModal} 
+                            level={modalContent.level} 
+                            servers={modalContent.servers} 
+                        />
+                    )}
+                    {/* Custom Message Display */}
+                    <CustomMessage message={message} onClose={() => setMessage(null)} />
+                </div>
+            );
+        };
+    </script>
+
+    <!-- Initialization Script (must be defined after React components) -->
+    <script>
+        /**
+         * Renders the React dashboard with the provided data.
+         * @param {Array} dataToDisplay - The data to be displayed in the dashboard.
+         */
+        const renderDashboard = (dataToDisplay) => {
+            const rootElement = document.getElementById('react-dashboard-root');
+            if (!reactRoot) {
+                // Create a React root if it's doesn't exist
+                reactRoot = ReactDOM.createRoot(rootElement);
+            }
+            globalDashboardData = dataToDisplay; // Store data globally
+            // Render the ServerEvaluationDashboard React component with the initial data
+            // ServerEvaluationDashboard is now defined globally via window.ServerEvaluationDashboard
+            reactRoot.render(React.createElement(window.ServerEvaluationDashboard, { initialData: dataToDisplay }));
+        };
+
+        // Initial render: show file upload section on DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('fileUploadSection').style.display = 'block';
+            document.getElementById('loadingScreen').style.display = 'none';
+            renderDashboard([]); // Render an empty dashboard initially
+        });
     </script>
 </body>
 </html>
