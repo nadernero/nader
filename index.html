@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم تقييم الخدام</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            border-radius: 16px;
+            padding: 24px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .blue-gradient { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .green-gradient { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .purple-gradient { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .orange-gradient { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+        
+        .file-input {
+            border: 2px dashed #667eea;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .file-input:hover {
+            border-color: #764ba2;
+            background-color: #f8f9ff;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+        }
+        
+        select {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            width: 100%;
+            margin-bottom: 16px;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- العنوان الرئيسي -->
+    <div class="gradient-bg text-white text-center py-12">
+        <h1 class="text-4xl font-bold mb-4">📊 لوحة تحكم تقييم الخدام</h1>
+        <p class="text-xl opacity-90">تحليل شامل لأداء الخدام عبر المحاور المختلفة</p>
+    </div>
+
+    <div class="container mx-auto px-6 py-8">
+        <!-- رفع الملف -->
+        <div class="card" id="fileUpload">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">📁 رفع ملف تقييم الخدام</h2>
+            <div class="file-input" onclick="document.getElementById('excelFile').click()">
+                <div class="text-6xl mb-4">📄</div>
+                <p class="text-lg font-semibold text-gray-700">اضغط هنا لرفع ملف Excel</p>
+                <p class="text-gray-500 text-sm mt-2">يدعم ملفات .xlsx و .xls</p>
+                <input type="file" id="excelFile" accept=".xlsx,.xls" style="display: none;" onchange="handleFileUpload(event)">
+            </div>
+        </div>
+
+        <!-- شاشة التحميل -->
+        <div class="loading" id="loadingScreen">
+            <div class="spinner"></div>
+            <p class="text-lg text-gray-600">جاري تحليل البيانات...</p>
+        </div>
+
+        <!-- لوحة التحكم -->
+        <div id="dashboard" style="display: none;">
+            <!-- فلاتر البحث -->
+            <div class="card">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">🔍 فلاتر البحث</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">نوع الخدمة</label>
+                        <select id="serviceFilter" onchange="applyFilters()">
+                            <option value="الكل">الكل</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">الفصل</label>
+                        <select id="classFilter" onchange="applyFilters()">
+                            <option value="الكل">الكل</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- الإحصائيات السريعة -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="stat-card blue-gradient">
+                    <div>
+                        <p class="text-sm opacity-80">إجمالي الخدام</p>
+                        <p class="text-3xl font-bold" id="totalServers">0</p>
+                    </div>
+                    <div class="text-4xl opacity-60">👥</div>
+                </div>
+                
+                <div class="stat-card green-gradient">
+                    <div>
+                        <p class="text-sm opacity-80">متوسط الأداء</p>
+                        <p class="text-3xl font-bold" id="avgScore">0%</p>
+                    </div>
+                    <div class="text-4xl opacity-60">📈</div>
+                </div>
+                
+                <div class="stat-card purple-gradient">
+                    <div>
+                        <p class="text-sm opacity-80">أفضل خادم</p>
+                        <p class="text-lg font-bold" id="topPerformer">-</p>
+                        <p class="text-sm opacity-80" id="topScore">0%</p>
+                    </div>
+                    <div class="text-4xl opacity-60">🏆</div>
+                </div>
+                
+                <div class="stat-card orange-gradient">
+                    <div>
+                        <p class="text-sm opacity-80">الأداء المتميز</p>
+                        <p class="text-3xl font-bold" id="excellentCount">0</p>
+                        <p class="text-sm opacity-80" id="excellentPercentage">0%</p>
+                    </div>
+                    <div class="text-4xl opacity-60">⭐</div>
+                </div>
+            </div>
+
+            <!-- الرسوم البيانية -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="card">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4 text-center">متوسط الأداء حسب المحاور</h3>
+                    <div class="chart-container">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4 text-center">التوزيع حسب نوع الخدمة</h3>
+                    <div class="chart-container">
+                        <canvas id="serviceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- أفضل الخدام -->
+            <div class="card">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4 text-center">🏆 أفضل 10 خدام في الأداء</h3>
+                <div class="chart-container">
+                    <canvas id="topPerformersChart"></canvas>
+                </div>
+            </div>
+
+            <!-- توزيع مستويات الأداء -->
+            <div class="card">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4 text-center">توزيع مستويات الأداء</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="performanceLevels">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allData = [];
+        let filteredData = [];
+        let charts = {};
+
+        // دالة آمنة لتحويل القيم إلى أرقام
+        function safeParseFloat(value) {
+            if (value === null || value === undefined || value === '' || value === '#N/A' || value === 0) return 0;
+            
+            let parsed = parseFloat(value);
+            
+            if (isNaN(parsed)) return 0;
+            
+            // القيم يجب أن تكون بين 0 و 1 (نسب عشرية)
+            // إذا كانت القيمة أكبر من 1، نفترض أنها نسبة مئوية ونحولها
+            if (parsed > 1) {
+                parsed = parsed / 100;
+            }
+            
+            return Math.max(0, Math.min(1, parsed));
+        }
+
+        // دالة تحويل إلى نسبة مئوية
+        function toPercentage(value) {
+            const num = safeParseFloat(value);
+            return parseFloat((num * 100).toFixed(1));
+        }
+
+        // معالجة رفع الملف
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            document.getElementById('fileUpload').style.display = 'none';
+            document.getElementById('loadingScreen').style.display = 'block';
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                    parseData(jsonData);
+                } catch (error) {
+                    alert('خطأ في قراءة الملف: ' + error.message);
+                    resetToFileUpload();
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // إعادة تعيين الواجهة لحالة رفع الملف
+        function resetToFileUpload() {
+            document.getElementById('fileUpload').style.display = 'block';
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'none';
+        }
+
+        // تحليل البيانات
+        function parseData(jsonData) {
+            allData = [];
+
+            if (!jsonData || jsonData.length < 3) {
+                alert('الملف لا يحتوي على بيانات كافية');
+                resetToFileUpload();
+                return;
+            }
+
+            console.log('البيانات الخام:', jsonData.slice(0, 5)); // للتشخيص
+
+            // البدء من الصف الثالث (index 2) حيث تبدأ بيانات الخدام
+            for (let i = 2; i < jsonData.length; i++) {
+                const row = jsonData[i];
+                if (row && row.length > 0 && row[0] && String(row[0]).trim() !== '') {
+                    const name = String(row[0]).trim();
+                    const service = String(row[1] || 'غير محدد').trim();
+                    const className = String(row[2] || 'غير محدد').trim();
+                    
+                    // قراءة النسب من الأعمدة الصحيحة (19-24)
+                    const axis1 = safeParseFloat(row[19]); // نسبة المحور 1
+                    const axis2 = safeParseFloat(row[20]); // نسبة المحور 2
+                    const axis3 = safeParseFloat(row[21]); // نسبة المحور 3
+                    const axis4 = safeParseFloat(row[22]); // نسبة المحور 4
+                    const axis5 = safeParseFloat(row[23]); // نسبة المحور 5
+                    const axis6 = safeParseFloat(row[24]); // نسبة المحور 6
+                    
+                    // المتوسط العام من العمود 25
+                    let average = safeParseFloat(row[25]);
+                    
+                    // التحقق من أن المتوسط صحيح (يجب أن يكون بين 0 و 1)
+                    if (average > 1) {
+                        average = average / 100;
+                    }
+
+                    const serverData = {
+                        name: name,
+                        service: service,
+                        class: className,
+                        axis1: axis1,
+                        axis2: axis2,
+                        axis3: axis3,
+                        axis4: axis4,
+                        axis5: axis5,
+                        axis6: axis6,
+                        average: average,
+                        strengths: String(row[27] || '').trim(),
+                        weaknesses: String(row[28] || '').trim(),
+                        notes: String(row[29] || '').trim()
+                    };
+
+                    // التحقق من صحة البيانات
+                    if (name && name !== '' && name !== '#N/A' && 
+                        (average > 0 || axis1 > 0 || axis2 > 0 || axis3 > 0 || axis4 > 0 || axis5 > 0 || axis6 > 0)) {
+                        allData.push(serverData);
+                        console.log(`تم إضافة: ${serverData.name} - ${serverData.service} - ${serverData.class} - متوسط: ${(serverData.average * 100).toFixed(1)}%`);
+                    }
+                }
+            }
+
+            if (allData.length === 0) {
+                alert('لم يتم العثور على بيانات صالحة في الملف. تأكد من أن الملف يحتوي على أسماء الخدام والنتائج');
+                resetToFileUpload();
+                return;
+            }
+
+            console.log('تم تحميل', allData.length, 'خادم بنجاح');
+            console.log('عينة من البيانات:', allData.slice(0, 3));
+
+            setupFilters();
+            filteredData = [...allData];
+            updateDashboard();
+
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+        }
+
+        // إعداد الفلاتر
+        function setupFilters() {
+            // استخراج الخدمات والفصول الفريدة
+            const services = [...new Set(allData
+                .map(item => item.service)
+                .filter(service => service && service !== 'غير محدد' && service.trim() !== '')
+            )].sort();
+            
+            const classes = [...new Set(allData
+                .map(item => item.class)
+                .filter(cls => cls && cls !== 'غير محدد' && cls.trim() !== '')
+            )].sort();
+
+            console.log('الخدمات المستخرجة:', services);
+            console.log('الفصول المستخرجة:', classes);
+
+            const serviceFilter = document.getElementById('serviceFilter');
+            const classFilter = document.getElementById('classFilter');
+
+            // مسح الخيارات الحالية
+            serviceFilter.innerHTML = '<option value="الكل">الكل</option>';
+            classFilter.innerHTML = '<option value="الكل">الكل</option>';
+
+            // إضافة الخدمات
+            services.forEach(service => {
+                const option = document.createElement('option');
+                option.value = service;
+                option.textContent = service;
+                serviceFilter.appendChild(option);
+            });
+
+            // إضافة الفصول
+            classes.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls;
+                option.textContent = cls;
+                classFilter.appendChild(option);
+            });
+
+            console.log('تم إعداد الفلاتر بنجاح');
+            console.log(`عدد الخدمات: ${services.length}, عدد الفصول: ${classes.length}`);
+        }
+
+        // تطبيق الفلاتر
+        function applyFilters() {
+            const selectedService = document.getElementById('serviceFilter').value;
+            const selectedClass = document.getElementById('classFilter').value;
+
+            filteredData = allData.filter(item => {
+                const serviceMatch = selectedService === 'الكل' || item.service === selectedService;
+                const classMatch = selectedClass === 'الكل' || item.class === selectedClass;
+                return serviceMatch && classMatch;
+            });
+
+            updateDashboard();
+        }
+
+        // تحديث لوحة التحكم
+        function updateDashboard() {
+            updateStatistics();
+            updateCharts();
+            updatePerformanceLevels();
+        }
+
+        // تحديث الإحصائيات
+        function updateStatistics() {
+            const validData = filteredData.filter(item => item.average > 0);
+            
+            if (validData.length === 0) {
+                document.getElementById('totalServers').textContent = '0';
+                document.getElementById('avgScore').textContent = '0%';
+                document.getElementById('topPerformer').textContent = 'لا يوجد';
+                document.getElementById('topScore').textContent = '0%';
+                document.getElementById('excellentCount').textContent = '0';
+                document.getElementById('excellentPercentage').textContent = '0%';
+                return;
+            }
+
+            const totalServers = validData.length;
+            const avgScore = validData.reduce((sum, item) => sum + item.average, 0) / totalServers;
+            const topPerformer = validData.reduce((prev, current) => 
+                (prev.average > current.average) ? prev : current
+            );
+            const excellentCount = validData.filter(item => item.average >= 0.9).length;
+
+            document.getElementById('totalServers').textContent = totalServers;
+            document.getElementById('avgScore').textContent = toPercentage(avgScore) + '%';
+            document.getElementById('topPerformer').textContent = topPerformer.name;
+            document.getElementById('topScore').textContent = toPercentage(topPerformer.average) + '%';
+            document.getElementById('excellentCount').textContent = excellentCount;
+            document.getElementById('excellentPercentage').textContent = 
+                ((excellentCount / totalServers) * 100).toFixed(1) + '%';
+        }
+
+        // تحديث الرسوم البيانية
+        function updateCharts() {
+            // تدمير الرسوم القديمة
+            Object.values(charts).forEach(chart => {
+                if (chart && typeof chart.destroy === 'function') {
+                    chart.destroy();
+                }
+            });
+            charts = {};
+
+            const validData = filteredData.filter(item => item.average > 0);
+            
+            if (validData.length === 0) {
+                // إخفاء الرسوم إذا لم تكن هناك بيانات
+                return;
+            }
+
+            // الرسم الراداري للمحاور
+            const axisNames = [
+                'الجانب الروحي',
+                'الالتزام والانضباط',
+                'مهارات الأداء',
+                'العمل الجماعي',
+                'النمو والتطوير',
+                'تقديم الدرس'
+            ];
+
+            const axisData = axisNames.map((name, index) => {
+                const axisKey = `axis${index + 1}`;
+                const validValues = validData.filter(item => item[axisKey] > 0);
+                const avg = validValues.length > 0 
+                    ? validValues.reduce((sum, item) => sum + item[axisKey], 0) / validValues.length 
+                    : 0;
+                return toPercentage(avg);
+            });
+
+            const radarCtx = document.getElementById('radarChart').getContext('2d');
+            charts.radar = new Chart(radarCtx, {
+                type: 'radar',
+                data: {
+                    labels: axisNames,
+                    datasets: [{
+                        label: 'النسبة المئوية',
+                        data: axisData,
+                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(102, 126, 234, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // رسم التوزيع حسب الخدمة
+            const serviceStats = {};
+            validData.forEach(item => {
+                if (!serviceStats[item.service]) {
+                    serviceStats[item.service] = { count: 0, totalScore: 0 };
+                }
+                serviceStats[item.service].count++;
+                serviceStats[item.service].totalScore += item.average;
+            });
+
+            const serviceLabels = Object.keys(serviceStats);
+            const serviceCounts = serviceLabels.map(service => serviceStats[service].count);
+
+            const serviceCtx = document.getElementById('serviceChart').getContext('2d');
+            charts.service = new Chart(serviceCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: serviceLabels,
+                    datasets: [{
+                        data: serviceCounts,
+                        backgroundColor: [
+                            '#667eea',
+                            '#764ba2',
+                            '#f093fb',
+                            '#f5576c',
+                            '#4facfe',
+                            '#00f2fe',
+                            '#43e97b',
+                            '#38f9d7'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        }
+                    }
+                }
+            });
+
+            // أفضل 10 خدام
+            const topPerformers = validData
+                .sort((a, b) => b.average - a.average)
+                .slice(0, 10);
+
+            const topNames = topPerformers.map(item => 
+                item.name.length > 15 ? item.name.substring(0, 15) + '...' : item.name
+            );
+            const topScores = topPerformers.map(item => toPercentage(item.average));
+
+            const topCtx = document.getElementById('topPerformersChart').getContext('2d');
+            charts.top = new Chart(topCtx, {
+                type: 'bar',
+                data: {
+                    labels: topNames,
+                    datasets: [{
+                        label: 'النسبة المئوية',
+                        data: topScores,
+                        backgroundColor: 'rgba(255, 198, 88, 0.8)',
+                        borderColor: 'rgba(255, 198, 88, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // تحديث توزيع مستويات الأداء
+        function updatePerformanceLevels() {
+            const levels = [
+                { label: 'ممتاز (90% فأكثر)', min: 0.9, color: 'bg-green-500', textColor: 'text-green-700' },
+                { label: 'جيد جداً (80-89%)', min: 0.8, max: 0.89, color: 'bg-blue-500', textColor: 'text-blue-700' },
+                { label: 'جيد (70-79%)', min: 0.7, max: 0.79, color: 'bg-yellow-500', textColor: 'text-yellow-700' },
+                { label: 'مقبول (أقل من 70%)', max: 0.69, color: 'bg-red-500', textColor: 'text-red-700' }
+            ];
+
+            const container = document.getElementById('performanceLevels');
+            container.innerHTML = '';
+
+            const validData = filteredData.filter(item => item.average > 0);
+
+            levels.forEach(level => {
+                const count = validData.filter(item => {
+                    if (level.min && level.max) {
+                        return item.average >= level.min && item.average <= level.max;
+                    } else if (level.min) {
+                        return item.average >= level.min;
+                    } else {
+                        return item.average <= level.max;
+                    }
+                }).length;
+
+                const percentage = validData.length ? 
+                    ((count / validData.length) * 100).toFixed(1) : '0.0';
+
+                container.innerHTML += `
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-4 h-4 rounded-full ${level.color}"></div>
+                            <span class="font-medium text-sm">${level.label}</span>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold ${level.textColor}">${count}</div>
+                            <div class="text-gray-500 text-sm">(${percentage}%)</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
