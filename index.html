@@ -4,100 +4,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تقييم الخدام</title>
-    
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <!-- Google Fonts - Cairo -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Font Awesome 6 CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0V4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
-    <!-- XLSX library -->
+    <!-- Font Awesome 6 CDN for professional icons (corrected integrity attribute) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" xintegrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0V4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- XLSX library for reading Excel files -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
-    <!-- React and ReactDOM -->
+    <!-- React and ReactDOM CDNs -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <!-- Chart.js -->
+    <!-- Chart.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    
-    <!-- Babel for JSX -->
+    <!-- Babel for JSX transformation in browser (for simplicity, in production use build tools) -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
+        /* CSS Variables for consistent theming */
         :root {
-            --primary: #4f46e5;
-            --secondary: #7c3aed;
-            --accent: #a855f7;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --light: #f9fafb;
-            --dark: #1f2937;
+            --primary-purple: #6a11cb;
+            --secondary-blue: #2575fc;
+            --gradient-start: #4a00e0; /* Deeper purple */
+            --gradient-end: #8e2de2;   /* Richer purple */
+            --light-blue-bg: #e0e7ff;
+            --dark-text: #333;
+            --light-text: #6b7280;
+            --border-color: #a7c0f0;
+            --background-light: #f0f2f5;
+            --card-bg: #ffffff;
+            --shadow-color: rgba(0,0,0,0.08);
+            --hover-shadow-color: rgba(0,0,0,0.15);
         }
-        
+
         body {
             font-family: 'Cairo', sans-serif;
-            background-color: var(--light);
-            color: var(--dark);
+            background-color: var(--background-light);
+            direction: rtl; /* Ensure RTL for the entire body */
         }
-        
         .gradient-bg {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
         }
-        
         .card {
-            background: white;
+            background: var(--card-bg);
             border-radius: 16px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 8px 20px var(--shadow-color);
             padding: 24px;
             margin-bottom: 24px;
             transition: all 0.3s ease;
         }
-        
+        .card:hover {
+            box-shadow: 0 12px 25px var(--hover-shadow-color);
+            transform: translateY(-3px);
+        }
         .file-input {
-            border: 2px dashed var(--primary);
+            border: 2px dashed var(--primary-purple);
             border-radius: 12px;
             padding: 40px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            background-color: #ffffff;
+            background-color: var(--card-bg);
         }
-        
         .file-input:hover {
-            border-color: var(--accent);
-            background-color: rgba(168, 85, 247, 0.05);
+            border-color: var(--secondary-blue);
+            background-color: #eef2ff; /* Light blue tint */
         }
-        
         .loading-screen {
             display: none;
             text-align: center;
             padding: 40px;
-            background-color: #ffffff;
+            background-color: var(--card-bg);
             border-radius: 16px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            box-shadow: 0 8px 20px var(--shadow-color);
         }
-        
         .spinner {
             border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary);
+            border-top: 4px solid var(--primary-purple);
             border-radius: 50%;
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
         }
-        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
-        /* Custom scrollbar */
+        /* Custom scrollbar for better aesthetics */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -114,7 +108,7 @@
             background: #777;
         }
 
-        /* Modal styles */
+        /* Modal specific styles */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -151,70 +145,63 @@
             opacity: 1;
         }
 
-        /* Mind Map styles */
-        .mind-map-container {
-            position: relative;
-            width: 100%;
-            height: 600px;
-            overflow: hidden;
-            background-color: white;
-            border-radius: 16px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-        }
-        
-        .mind-map-node {
+        /* Mind Map SVG Styling */
+        .mind-map-node-text {
             font-family: 'Cairo', sans-serif;
             font-size: 14px;
             font-weight: 600;
-            fill: #333;
+            fill: var(--dark-text);
             text-anchor: middle;
-            transition: all 0.3s ease;
-            cursor: pointer;
+            transition: fill 0.3s ease;
+            user-select: none; /* Prevent text selection */
         }
-        
-        .mind-map-node:hover {
-            fill: var(--primary);
+        /* Specific text colors for root and categories for better contrast */
+        .mind-map-node-text.root {
+            fill: #ffffff;
         }
-        
+        .mind-map-node-text.category {
+            fill: var(--dark-text); /* Ensure dark text on colored category nodes */
+        }
+        .mind-map-node-text.item {
+            fill: var(--dark-text); /* Ensure dark text on colored item nodes */
+        }
+
         .mind-map-line {
             stroke: #c0c0c0;
             stroke-width: 1.5;
             fill: none;
-            transition: all 0.3s ease;
+            transition: stroke 0.3s ease, stroke-width 0.3s ease;
         }
-        
         .mind-map-line:hover {
-            stroke: var(--secondary);
+            stroke: var(--gradient-end);
             stroke-width: 2.5;
         }
-        
         .mind-map-rect {
-            fill: #e0e7ff;
-            stroke: #a7c0f0;
+            fill: var(--light-blue-bg);
+            stroke: var(--border-color);
             stroke-width: 1;
             rx: 8;
             ry: 8;
-            transition: all 0.3s ease;
-            filter: url(#shadow);
+            transition: fill 0.3s ease, stroke 0.3s ease;
+            filter: url(#shadow); /* Apply shadow filter */
         }
-        
         .mind-map-rect:hover {
             fill: #c7d8ff;
-            stroke: var(--primary);
+            stroke: var(--primary-purple);
         }
-        
-        .mind-map-tooltip {
-            position: absolute;
-            background: white;
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 100;
-            max-width: 300px;
-            pointer-events: none;
+        /* Specific rect colors for root and categories/items based on performance */
+        .mind-map-rect.root {
+            fill: var(--primary-purple); /* Default root color */
+            stroke: var(--gradient-start);
         }
-        
-        /* Print styles */
+        .mind-map-node-icon {
+            color: var(--primary-purple);
+        }
+        .mind-map-node-icon.root {
+            color: white;
+        }
+
+        /* Print specific styles */
         @media print {
             body {
                 background-color: #fff !important;
@@ -232,11 +219,11 @@
                 border: 1px solid #eee !important;
                 margin-bottom: 10px !important;
                 padding: 15px !important;
-                page-break-inside: avoid;
             }
             .mind-map-rect {
-                filter: none !important;
+                filter: none !important; /* Remove shadow for print */
             }
+            /* Ensure charts render correctly for print */
             canvas {
                 max-width: 100% !important;
                 height: auto !important;
@@ -298,9 +285,9 @@
             </div>
             <div>
               <h3 class="text-lg font-bold mb-4">اتصل بنا</h3>
-              <p class="text-indigo-100"><i class="fas fa-at fa-fw ml-2"></i>البريد الإلكتروني: info@evaluation.com</p>
-              <p class="text-indigo-100"><i class="fas fa-phone fa-fw ml-2"></i>الهاتف: +20 123 456 7890</p>
-              <p class="text-indigo-100"><i class="fas fa-map-marker-alt fa-fw ml-2"></i>العنوان: القاهرة، مصر</p>
+              <p class="text-indigo-100"><i class="fas fa-at fa-fw ml-2"></i>البريد الإلكتروني: nadernero2003@gmail.com</p>
+              <p class="text-indigo-100"><i class="fas fa-phone fa-fw ml-2"></i>الهاتف: 01273332947</p>
+              <p class="text-indigo-100"><i class="fas fa-map-marker-alt fa-fw ml-2"></i>العنوان: العبور، مصر</p>
             </div>
           </div>
           <div class="border-t border-indigo-700 mt-8 pt-6 text-center text-indigo-200">
@@ -309,12 +296,18 @@
         </div>
     </footer>
 
-    <!-- Global Utility Functions -->
+    <!-- Global Utility Functions (must be defined before React components and their usage) -->
     <script>
+        // Global variables for React root and data
         let reactRoot = null;
         let globalDashboardData = [];
-        const apiKey = ""; // Gemini API key
 
+        /**
+         * Safely parses a value to a float, handling null, undefined, empty strings, and non-numeric values.
+         * Converts percentages (values > 1) to decimals.
+         * @param {*} value - The value to parse.
+         * @returns {number} The parsed float value, clamped between 0 and 1.
+         */
         const safeParseFloat = (value) => {
             if (value === null || value === undefined || value === '' || value === '#N/A' || value === 0) return 0;
             
@@ -322,6 +315,8 @@
             
             if (isNaN(parsed)) return 0;
             
+            // Values should be between 0 and 1 (decimal percentages)
+            // If value is greater than 1, assume it's a percentage and convert
             if (parsed > 1) {
                 parsed = parsed / 100;
             }
@@ -329,18 +324,26 @@
             return Math.max(0, Math.min(1, parsed));
         };
 
+        /**
+         * Parses raw JSON data from Excel into a structured format for the dashboard.
+         * Uses header names to map columns, making it more robust.
+         * @param {Array<Array<any>>} jsonData - The raw JSON data from the Excel sheet.
+         * @returns {Array<Object>} An array of parsed server data objects.
+         */
         const parseExcelData = (jsonData) => {
             const parsedData = [];
 
-            if (!jsonData || jsonData.length < 2) {
+            if (!jsonData || jsonData.length < 2) { // Need at least 2 rows: headers and one data row
                 return parsedData;
             }
 
-            const headerRow = jsonData[0];
+            const headerRow = jsonData[0]; // Assuming first row is header
             const columnMap = {};
 
+            // Normalize header names for mapping
             const normalizeHeader = (header) => String(header).trim().replace(/\s+/g, ' ').replace(/\n/g, ' ');
 
+            // Define expected headers and their corresponding data keys
             const expectedHeaders = {
                 'اسم الخادم': 'name',
                 'الخدمة الحالية': 'service',
@@ -357,6 +360,7 @@
                 'ملاحظات الأمين': 'notes'
             };
 
+            // Build column map from actual headers to internal keys
             headerRow.forEach((header, index) => {
                 const normalizedHeader = normalizeHeader(header);
                 for (const key in expectedHeaders) {
@@ -367,21 +371,25 @@
                 }
             });
 
-            const essentialColumns = ['name', 'average'];
+            // Check if all essential columns are found
+            const essentialColumns = ['name', 'average']; // Minimum required columns
             for (const col of essentialColumns) {
                 if (columnMap[col] === undefined) {
                     console.warn(`Missing essential column: ${col}. Data parsing might be incomplete.`);
                 }
             }
 
+            // Start parsing data from the row after the header (index 1)
             for (let i = 1; i < jsonData.length; i++) {
                 const row = jsonData[i];
+                // Skip empty rows or rows without a name
                 if (!row || !row[columnMap.name] || String(row[columnMap.name]).trim() === '') {
                     continue;
                 }
 
                 const name = String(row[columnMap.name] || '').trim();
                 
+                // Only add data if name is present and not '#N/A'
                 if (name && name !== '#N/A') {
                     parsedData.push({
                         name: name,
@@ -397,26 +405,39 @@
                         strengths: String(row[columnMap.strengths] || '').trim(),
                         weaknesses: String(row[columnMap.weaknesses] || '').trim(),
                         notes: String(row[columnMap.notes] || '').trim(),
-                        fullName: name
+                        fullName: name // Store full name for display
                     });
                 }
             }
             return parsedData;
         };
 
+        /**
+         * Function to reset the UI to file upload state (global scope)
+         */
         const resetToFileUpload = () => {
             document.getElementById('fileUploadSection').style.display = 'block';
             document.getElementById('loadingScreen').style.display = 'none';
             if (reactRoot) {
+                // Unmount the React component if it's mounted
                 reactRoot.render(null); 
             }
-            globalDashboardData = [];
+            globalDashboardData = []; // Clear global data
         };
 
+        /**
+         * Event handler for file input click (global scope)
+         * Opens the file selection dialog.
+         */
         window.handleFileUploadClick = () => {
             document.getElementById('excelFile').click();
         };
 
+        /**
+         * Event handler for file change (global scope)
+         * Reads the Excel file and parses its data.
+         * @param {Event} event - The file change event.
+         */
         window.handleFileChange = (event) => {
             const file = event.target.files[0];
             if (!file) return;
@@ -429,18 +450,21 @@
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
-                    const sheetName = workbook.SheetNames[0];
+                    const sheetName = workbook.SheetNames[0]; // Assume the first sheet
                     const worksheet = workbook.Sheets[sheetName];
                     const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
                     const parsedData = parseExcelData(jsonData);
                     if (parsedData.length > 0) {
+                        // Call renderDashboard which is defined after React components
                         renderDashboard(parsedData); 
                     } else {
+                        // Use custom message instead of alert
                         window.showMessage('error', 'لم يتم العثور على بيانات صالحة في الملف. تأكد من أن الملف يحتوي على أسماء الخدام والنتائج.');
                         resetToFileUpload();
                     }
                 } catch (error) {
+                    // Handle file reading errors
                     window.showMessage('error', 'خطأ في قراءة الملف: ' + error.message);
                     console.error('File reading error:', error);
                     resetToFileUpload();
@@ -452,10 +476,16 @@
         };
     </script>
 
-    <!-- React Components -->
+    <!-- React Components (Babel needs to process this first) -->
     <script type="text/babel">
         const { useState, useEffect, useMemo, useCallback, useRef } = React;
         
+        /**
+         * Custom Message Display Component.
+         * @param {Object} props - Component props.
+         * @param {Object} props.message - Message object { type: 'success'|'error'|'info', text: '...' }.
+         * @param {function} props.onClose - Function to close the message.
+         */
         const CustomMessage = ({ message, onClose }) => {
             if (!message) return null;
 
@@ -473,6 +503,14 @@
             );
         };
 
+        /**
+         * Modal component to display a list of servers for a given performance level.
+         * @param {Object} props - Component props.
+         * @param {boolean} props.isOpen - Whether the modal is open.
+         * @param {function} props.onClose - Function to close the modal.
+         * @param {Object} props.level - The performance level object (e.g., { label: 'ممتاز', color: '#10b981', iconClass: 'star' }).
+         * @param {Array<Object>} props.servers - Array of server objects belonging to this level.
+         */
         const ServerListModal = ({ isOpen, onClose, level, servers }) => {
             if (!isOpen) return null;
 
@@ -512,235 +550,307 @@
             );
         };
 
-        const MindMap = ({ data }) => {
+        /**
+         * Calculates the path for a Bézier curve between two points.
+         * @param {Object} source - The source point {x, y}.
+         * @param {Object} target - The target point {x, y}.
+         * @returns {string} The SVG path string.
+         */
+        const calculateBezierPath = (source, target) => {
+            const controlPointX = source.x + (target.x - source.x) * 0.5;
+            return `M${source.x},${source.y} C${controlPointX},${source.y} ${controlPointX},${target.y} ${target.x},${target.y}`;
+        };
+
+        /**
+         * React component for rendering a dynamic Mind Map using SVG.
+         * Displays filtered data categories and sample items.
+         * @param {Object} props - Component props.
+         * @param {Array<Object>} props.data - The filtered data to display in the mind map.
+         * @param {string} props.selectedService - The currently selected service from the filter.
+         */
+        const MindMap = ({ data, selectedService }) => { 
             const svgRef = useRef(null);
             const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
-            const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 });
-            const [tooltip, setTooltip] = useState({ visible: false, content: '', x: 0, y: 0 });
+            
+            // Define performance levels for color coding
+            const performanceColors = useMemo(() => ({
+                excellent: '#10b981', // green
+                veryGood: '#3b82f6',  // blue
+                good: '#f59e0b',      // yellow
+                acceptable: '#f97316', // orange
+                weak: '#ef4444'       // red
+            }), []);
 
+            const getNodeColor = useCallback((average) => {
+                if (average >= 0.9) return performanceColors.excellent;
+                if (average >= 0.8) return performanceColors.veryGood;
+                if (average >= 0.7) return performanceColors.good;
+                if (average >= 0.6) return performanceColors.acceptable;
+                return performanceColors.weak;
+            }, [performanceColors]);
+
+            // Prepare hierarchical data for the mind map
+            const mindMapData = useMemo(() => {
+                const nodes = new Map();
+                const links = [];
+
+                // If no specific service is selected, show a prompt or a generic root
+                if (selectedService === 'الكل' || !selectedService || data.length === 0) {
+                    const root = { id: 'root-prompt', label: 'الرجاء اختيار خدمة لعرض الخريطة الذهنية', type: 'root', children: [], icon: 'fas fa-info-circle' };
+                    nodes.set(root.id, root);
+                    return { nodes, links };
+                }
+
+                // Filter data for the selected service
+                const serviceData = data.filter(d => d.service === selectedService);
+                if (serviceData.length === 0) {
+                    const root = { id: 'root-no-data', label: `لا توجد بيانات للخادمة: ${selectedService}`, type: 'root', children: [], icon: 'fas fa-exclamation-triangle' };
+                    nodes.set(root.id, root);
+                    return { nodes, links };
+                }
+
+                // Calculate average for the selected service
+                const serviceAverage = serviceData.reduce((sum, item) => sum + item.average, 0) / serviceData.length;
+                const serviceLabel = `${selectedService} (${(serviceAverage * 100).toFixed(1)}%)`;
+                const serviceNodeColor = getNodeColor(serviceAverage);
+
+                // 1. Root Node: Selected Service
+                const root = { id: 'service-root', label: serviceLabel, type: 'root', children: [], icon: 'fas fa-tags', average: serviceAverage, color: serviceNodeColor };
+                nodes.set(root.id, root);
+
+                // 2. Level 1: Classes within the selected service
+                const uniqueClasses = Array.from(new Set(serviceData.map(d => d.class).filter(c => c && c.trim() !== '' && c !== 'غير محدد')));
+                
+                uniqueClasses.forEach(cls => {
+                    const classServers = serviceData.filter(d => d.class === cls);
+                    const classAverage = classServers.reduce((sum, item) => sum + item.average, 0) / classServers.length;
+                    const classLabel = `${cls} (${(classAverage * 100).toFixed(1)}%)`;
+                    const classNodeColor = getNodeColor(classAverage);
+
+                    const classNode = { id: `class-${cls}`, label: classLabel, type: 'category', parentId: root.id, average: classAverage, color: classNodeColor };
+                    nodes.set(classNode.id, classNode);
+                    root.children.push(classNode.id);
+                    links.push({ source: root.id, target: classNode.id });
+
+                    // 3. Level 2: Servers within each class
+                    classServers.forEach(server => {
+                        const serverLabel = `${server.name} (${(server.average * 100).toFixed(1)}%)`;
+                        const serverNodeColor = getNodeColor(server.average);
+                        const serverNode = { id: `server-${server.name}`, label: serverLabel, type: 'item', parentId: classNode.id, average: server.average, color: serverNodeColor };
+                        nodes.set(serverNode.id, serverNode);
+                        links.push({ source: classNode.id, target: serverNode.id });
+                    });
+                });
+
+                return { nodes, links };
+            }, [data, selectedService, getNodeColor]);
+
+            // Effect to update SVG dimensions on window resize and data change
             useEffect(() => {
                 const updateDimensions = () => {
                     if (svgRef.current && svgRef.current.parentElement) {
+                        const parentWidth = svgRef.current.parentElement.clientWidth;
+                        const parentHeight = svgRef.current.parentElement.clientHeight;
+
+                        let requiredWidth = 0;
+                        let requiredHeight = 0;
+
+                        const rootNode = mindMapData.nodes.get('service-root') || mindMapData.nodes.get('root-prompt') || mindMapData.nodes.get('root-no-data');
+                        if (rootNode) {
+                            // Estimate root node width
+                            const rootTextWidth = rootNode.label.length * 8 + 30; // approx char width + icon space
+                            requiredWidth += Math.max(120, rootTextWidth); // Root node width
+                            requiredWidth += 100; // Spacing after root
+
+                            const classNodes = Array.from(mindMapData.nodes.values()).filter(node => node.type === 'category' && node.parentId === rootNode.id);
+                            
+                            let maxClassHeight = 0;
+                            let currentX = requiredWidth; // Start X for classes
+
+                            classNodes.forEach(classNode => {
+                                const classTextWidth = classNode.label.length * 8 + 20;
+                                const classNodeWidth = Math.max(120, classTextWidth);
+                                
+                                currentX += classNodeWidth + 50; // Add class node width + spacing
+                                
+                                const serverNodes = Array.from(mindMapData.nodes.values()).filter(node => node.type === 'item' && node.parentId === classNode.id);
+                                const serversHeight = serverNodes.length * 40 + (serverNodes.length > 0 ? 60 : 0); // Server nodes height + initial offset
+                                maxClassHeight = Math.max(maxClassHeight, serversHeight);
+                            });
+
+                            requiredWidth = currentX; // Total width for classes and their servers
+                            requiredHeight = 100 + maxClassHeight; // Base height + max height of any class branch
+
+                            // Ensure minimum dimensions
+                            requiredWidth = Math.max(parentWidth, requiredWidth, 800);
+                            requiredHeight = Math.max(parentHeight, requiredHeight, 600);
+                        } else {
+                            // If no data or prompt, use default parent dimensions
+                            requiredWidth = parentWidth;
+                            requiredHeight = parentHeight;
+                        }
+                        
                         setDimensions({
-                            width: svgRef.current.parentElement.clientWidth,
-                            height: Math.max(600, svgRef.current.parentElement.clientHeight)
+                            width: requiredWidth,
+                            height: requiredHeight
                         });
                     }
                 };
-                updateDimensions();
-                window.addEventListener('resize', updateDimensions);
-                return () => window.removeEventListener('resize', updateDimensions);
-            }, []);
+                updateDimensions(); // Initial dimensions
+                window.addEventListener('resize', updateDimensions); // Add resize listener
+                // Re-calculate dimensions when mindMapData changes
+                const timeoutId = setTimeout(updateDimensions, 100); // Small delay to ensure nodes are in DOM for textWidth calculation if needed
+                return () => {
+                    window.removeEventListener('resize', updateDimensions);
+                    clearTimeout(timeoutId);
+                };
+            }, [mindMapData]); // Dependency on mindMapData
 
-            const handleWheel = (e) => {
-                e.preventDefault();
-                const scale = e.deltaY < 0 ? transform.scale * 1.1 : transform.scale / 1.1;
-                setTransform({ ...transform, scale: Math.max(0.5, Math.min(2, scale)) });
-            };
+            // Calculate positions for nodes
+            const positionedNodes = useMemo(() => {
+                const nodesMap = mindMapData.nodes;
+                const calculatedPositions = new Map();
 
-            const handleMouseMove = (e) => {
-                if (tooltip.visible) {
-                    setTooltip(prev => ({
-                        ...prev,
-                        x: e.clientX + 10,
-                        y: e.clientY + 10
-                    }));
-                }
-            };
+                const rootNode = nodesMap.get('service-root') || nodesMap.get('root-prompt') || nodesMap.get('root-no-data');
+                if (!rootNode) return calculatedPositions;
 
-            const handleNodeClick = (node) => {
-                if (node.servers && node.servers.length > 0) {
-                    const content = node.servers.slice(0, 3).map(s => `${s.name} - ${s.service}`).join('\n');
-                    setTooltip({
-                        visible: true,
-                        content: `${node.label}:\n${content}`,
-                        x: e.clientX + 10,
-                        y: e.clientY + 10
-                    });
-                }
-            };
+                // Start root node on the far left, vertically centered
+                const rootX = 150; // Fixed X for root
+                const rootY = dimensions.height / 2;
+                calculatedPositions.set(rootNode.id, { x: rootX, y: rootY });
 
-            const nodes = [];
-            const links = [];
-
-            // Central node
-            const centerNode = { 
-                id: 'evaluation', 
-                label: 'التقييم', 
-                x: dimensions.width / 2, 
-                y: dimensions.height / 2 
-            };
-            nodes.push(centerNode);
-
-            // Level 1 nodes
-            const level1Nodes = [
-                { id: 'classes', label: 'الفصول', xOffset: -200, yOffset: -100 },
-                { id: 'services', label: 'الخدمات', xOffset: -200, yOffset: 100 },
-                { id: 'axes', label: 'المحاور', xOffset: 200, yOffset: -100 },
-                { id: 'servers', label: 'الخدام', xOffset: 200, yOffset: 100 }
-            ];
-
-            level1Nodes.forEach(node => {
-                const x = centerNode.x + node.xOffset * transform.scale;
-                const y = centerNode.y + node.yOffset * transform.scale;
-                nodes.push({ 
-                    id: node.id, 
-                    label: node.label, 
-                    x, 
-                    y,
-                    level: 1
+                // Position Level 1 (Classes) horizontally to the right of the root
+                const classNodes = Array.from(nodesMap.values()).filter(node => node.type === 'category' && node.parentId === rootNode.id);
+                
+                let currentClassX = rootX + 250; // Start classes 250px to the right of the root
+                const classVerticalSpacing = 100; // Vertical spacing between class nodes
+                
+                // Calculate total height needed for all class branches to center them
+                let totalClassesHeight = 0;
+                classNodes.forEach(classNode => {
+                    const serverNodes = Array.from(nodesMap.values()).filter(node => node.type === 'item' && node.parentId === classNode.id);
+                    totalClassesHeight += (serverNodes.length * 40) + (serverNodes.length > 0 ? 60 : 0) + 40; // Servers height + initial offset + class node height
                 });
-                links.push({ 
-                    source: centerNode, 
-                    target: { x, y, id: node.id } 
-                });
-            });
+                const initialClassY = rootY - (totalClassesHeight / 2) + (classNodes.length > 0 ? classVerticalSpacing / 2 : 0); // Center vertically
 
-            // Get unique values for sub-nodes
-            const uniqueClasses = Array.from(new Set(data.map(d => d.class))).filter(c => c && c !== 'غير محدد');
-            const uniqueServices = Array.from(new Set(data.map(d => d.service))).filter(s => s && s !== 'غير محدد');
-            const axisNames = [
-                'الجانب الروحي',
-                'الالتزام',
-                'المهارات',
-                'العمل الجماعي',
-                'النمو',
-                'تقديم الدرس'
-            ];
-            const uniqueServers = Array.from(new Set(data.map(d => d.name))).filter(n => n && n.trim() !== '');
+                let currentClassY = initialClassY;
 
-            // Add sub-nodes with servers data
-            const addSubNodes = (parentId, labels, serversData = []) => {
-                const parent = nodes.find(n => n.id === parentId);
-                if (!parent) return;
+                classNodes.forEach((classNode, classIndex) => {
+                    calculatedPositions.set(classNode.id, { x: currentClassX, y: currentClassY });
 
-                return labels.map((label, index) => {
-                    const angle = parentId === 'servers' ? 0 : Math.PI;
-                    const distance = 150 * transform.scale;
-                    const x = parent.x + Math.cos(angle) * distance;
-                    const y = parent.y + (index - (labels.length - 1) / 2) * 50 * transform.scale;
-                    
-                    const nodeId = `${parentId}-${label}`;
-                    const nodeServers = serversData.filter(s => 
-                        (parentId === 'classes' && s.class === label) ||
-                        (parentId === 'services' && s.service === label) ||
-                        (parentId === 'servers' && s.name === label)
-                    );
-                    
-                    nodes.push({
-                        id: nodeId,
-                        label,
-                        x,
-                        y,
-                        parent: parentId,
-                        level: parent.level + 1,
-                        servers: nodeServers
+                    // Position Level 2 (Servers) vertically below each class node
+                    const serverNodes = Array.from(nodesMap.values()).filter(node => node.type === 'item' && node.parentId === classNode.id);
+                    const serverVerticalSpacing = 40; // Spacing between server nodes vertically
+                    const initialServerOffsetY = 60; // Initial offset below the class node
+
+                    serverNodes.forEach((serverNode, serverIndex) => {
+                        const serverX = currentClassX; // Align servers horizontally with their class
+                        const serverY = currentClassY + initialServerOffsetY + serverIndex * serverVerticalSpacing;
+                        calculatedPositions.set(serverNode.id, { x: serverX, y: serverY });
                     });
                     
-                    links.push({
-                        source: parent,
-                        target: { x, y, id: nodeId }
-                    });
-                    
-                    return nodeId;
+                    // Move currentClassY for the next class's branch
+                    currentClassY += (serverNodes.length * serverVerticalSpacing) + initialServerOffsetY + classVerticalSpacing;
                 });
-            };
 
-            // Add sub-nodes with limited number for better visualization
-            addSubNodes('classes', uniqueClasses.slice(0, 5), data);
-            addSubNodes('services', uniqueServices.slice(0, 5), data);
-            addSubNodes('axes', axisNames);
-            addSubNodes('servers', uniqueServers.slice(0, 5), data);
+                return calculatedPositions;
+            }, [mindMapData, dimensions]);
+
+            // All generated nodes are visible in this new structure
+            const visibleNodes = useMemo(() => {
+                return Array.from(mindMapData.nodes.values());
+            }, [mindMapData]);
+
+            const visibleLinks = useMemo(() => {
+                return mindMapData.links.map(link => {
+                    const sourcePos = positionedNodes.get(link.source);
+                    const targetPos = positionedNodes.get(link.target);
+                    return {
+                        source: sourcePos,
+                        target: targetPos
+                    };
+                }).filter(link => link.source && link.target);
+            }, [mindMapData, positionedNodes]);
+
+            // Fallback message if no data to display mind map
+            if (mindMapData.nodes.size === 1 && (mindMapData.nodes.has('root-prompt') || mindMapData.nodes.has('root-no-data'))) {
+                const fallbackNode = mindMapData.nodes.values().next().value;
+                return (
+                    <div className="bg-gradient-to-br from-white to-gray-50 p-8 rounded-xl shadow-lg border border-gray-100 text-center h-full min-h-[600px] flex flex-col items-center justify-center">
+                        <i className={`${fallbackNode.icon} fa-fw mx-auto text-gray-400 mb-4 text-5xl`}></i>
+                        <h3 className="text-xl font-bold text-gray-700">{fallbackNode.label}</h3>
+                        {fallbackNode.id === 'root-prompt' && <p className="text-gray-500">يرجى استخدام قائمة "نوع الخدمة" في الأعلى لتحديد خدمة معينة.</p>}
+                    </div>
+                );
+            }
 
             return (
-                <div className="mind-map-container" onMouseMove={handleMouseMove}>
-                    {tooltip.visible && (
-                        <div 
-                            className="mind-map-tooltip" 
-                            style={{ 
-                                left: `${tooltip.x}px`, 
-                                top: `${tooltip.y}px`,
-                                display: tooltip.visible ? 'block' : 'none'
-                            }}
-                        >
-                            <pre className="text-sm whitespace-pre-wrap">{tooltip.content}</pre>
-                            <button 
-                                onClick={() => setTooltip({ ...tooltip, visible: false })}
-                                className="absolute top-1 left-1 text-xs text-gray-500 hover:text-gray-700"
-                            >
-                                <i className="fas fa-times"></i>
-                            </button>
-                        </div>
-                    )}
-                    
-                    <svg 
-                        ref={svgRef} 
-                        width="100%" 
-                        height="100%" 
-                        viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
-                        onWheel={handleWheel}
-                        style={{ cursor: 'grab' }}
-                    >
+                <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 h-full min-h-[600px] flex items-center justify-center overflow-x-auto">
+                    <svg ref={svgRef} width={dimensions.width} height={dimensions.height} viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}>
                         <defs>
+                            {/* Define shadow filter for nodes */}
                             <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
                                 <feDropShadow dx="2" dy="2" stdDeviation="3" floodColor="#000" floodOpacity="0.2"/>
                             </filter>
                         </defs>
-                        
-                        {/* Render links */}
-                        {links.map((link, index) => (
-                            <line 
+                        {/* Render links (lines connecting nodes) */}
+                        {visibleLinks.map((link, index) => (
+                            <path 
                                 key={index}
-                                x1={link.source.x} 
-                                y1={link.source.y}
-                                x2={link.target.x} 
-                                y2={link.target.y}
+                                d={calculateBezierPath(link.source, link.target)}
                                 className="mind-map-line"
                             />
                         ))}
-                        
-                        {/* Render nodes */}
-                        {nodes.map((node, index) => {
-                            const textWidth = node.label.length * 8 + 20;
-                            const rectWidth = Math.max(100, textWidth);
-                            const rectHeight = 35;
-                            const rectX = node.x - rectWidth / 2;
-                            const rectY = node.y - rectHeight / 2;
-                            
+                        {/* Render nodes (rectangles with text) */}
+                        {visibleNodes.map((node, index) => {
+                            const position = positionedNodes.get(node.id);
+                            if (!position) return null; // Node not positioned (e.g., collapsed)
+
+                            // Estimate text width for dynamic rectangle sizing
+                            // This is a rough estimate; for precise sizing, one would need to measure text in SVG
+                            const textLengthMultiplier = (node.label.length > 20) ? 9 : 10; // Adjust for longer texts
+                            const textWidth = node.label.length * textLengthMultiplier + (node.icon ? 30 : 20); 
+                            const rectWidth = Math.max(150, textWidth); // Minimum width for better appearance
+                            const rectHeight = 40;
+                            const rectX = position.x - rectWidth / 2;
+                            const rectY = position.y - rectHeight / 2;
+
+                            // Determine fill color based on node type and average
+                            let fillColor = '';
+                            let strokeColor = '';
+                            let textColor = 'var(--dark-text)'; // Default text color
+
+                            if (node.type === 'root') {
+                                fillColor = node.color || 'var(--primary-purple)';
+                                strokeColor = node.color || 'var(--gradient-start)'; // Use node.color for stroke as well
+                                textColor = '#ffffff'; // White for root text
+                            } else if (node.type === 'category') { // Classes
+                                fillColor = node.color ? node.color + '20' : '#a7c0f0'; // Lighter tint of average color
+                                strokeColor = node.color || 'var(--primary-purple)';
+                            } else { // Items (Servers)
+                                fillColor = node.color ? node.color + '10' : 'var(--light-blue-bg)'; // Even lighter tint
+                                strokeColor = node.color || 'var(--border-color)';
+                            }
+
+
                             return (
-                                <g 
-                                    key={index}
-                                    onClick={() => handleNodeClick(node)}
-                                    onMouseEnter={() => {
-                                        if (node.servers && node.servers.length > 0) {
-                                            const content = node.servers.slice(0, 3)
-                                                .map(s => `${s.name} - ${s.service}`)
-                                                .join('\n');
-                                            setTooltip({
-                                                visible: true,
-                                                content: `${node.label}:\n${content}`,
-                                                x: 0,
-                                                y: 0
-                                            });
-                                        }
-                                    }}
-                                    onMouseLeave={() => setTooltip(prev => ({ ...prev, visible: false }))}
-                                >
+                                <g key={node.id} >
                                     <rect 
-                                        x={rectX} 
-                                        y={rectY} 
-                                        width={rectWidth} 
-                                        height={rectHeight} 
-                                        className="mind-map-rect"
-                                        style={{ 
-                                            fill: node.level === 1 ? '#e0e7ff' : 
-                                                  node.level === 2 ? '#dbeafe' : '#bfdbfe'
-                                        }}
+                                        x={rectX} y={rectY} 
+                                        width={rectWidth} height={rectHeight} 
+                                        rx="8" ry="8"
+                                        style={{ fill: fillColor, stroke: strokeColor, strokeWidth: 1, filter: 'url(#shadow)' }}
                                     />
+                                    {node.icon && (
+                                        <foreignObject x={rectX + (rectWidth / 2) - 12} y={rectY + 5} width="24" height="24">
+                                            <i className={`${node.icon} text-lg`} style={{ color: node.type === 'root' ? 'white' : 'var(--primary-purple)' }}></i>
+                                        </foreignObject>
+                                    )}
                                     <text 
-                                        x={node.x} 
-                                        y={node.y + 5} 
-                                        className="mind-map-node"
+                                        x={position.x} 
+                                        y={position.y + (node.icon ? 20 : 5)} /* Adjust text position if icon is present */
+                                        className={`mind-map-node-text ${node.type}`}
+                                        style={{ fill: textColor }}
                                     >
                                         {node.label}
                                     </text>
@@ -748,229 +858,53 @@
                             );
                         })}
                     </svg>
-                    
-                    <div className="absolute bottom-4 right-4 flex space-x-2">
-                        <button 
-                            onClick={() => setTransform({ ...transform, scale: Math.min(2, transform.scale + 0.1) })}
-                            className="p-2 bg-white rounded-full shadow-md hover:bg-gray-100"
-                        >
-                            <i className="fas fa-search-plus text-gray-700"></i>
-                        </button>
-                        <button 
-                            onClick={() => setTransform({ ...transform, scale: Math.max(0.5, transform.scale - 0.1) })}
-                            className="p-2 bg-white rounded-full shadow-md hover:bg-gray-100"
-                        >
-                            <i className="fas fa-search-minus text-gray-700"></i>
-                        </button>
-                        <button 
-                            onClick={() => setTransform({ x: 0, y: 0, scale: 1 })}
-                            className="p-2 bg-white rounded-full shadow-md hover:bg-gray-100"
-                        >
-                            <i className="fas fa-sync-alt text-gray-700"></i>
-                        </button>
-                    </div>
                 </div>
             );
         };
 
-        const PerformanceLevels = ({ levels, onLevelClick }) => {
-            return (
-                <div className="bg-gradient-to-br from-white to-gray-50 p-6 rounded-xl shadow-lg border border-gray-100 mb-6">
-                    <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                        <i className="fas fa-chart-bar fa-fw ml-2 text-xl"></i>
-                        توزيع الدرجات حسب المستويات
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                        {levels.map((level, index) => (
-                            <button 
-                                key={index} 
-                                onClick={() => onLevelClick(level)}
-                                className="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm border border-gray-100 transform transition-all duration-200 hover:scale-105 hover:shadow-md cursor-pointer"
-                            >
-                                <div 
-                                    className="w-16 h-16 rounded-full flex items-center justify-center mb-2"
-                                    style={{ backgroundColor: level.color + '20', border: `2px solid ${level.color}` }}
-                                >
-                                    <span className="font-bold text-lg" style={{ color: level.color }}>
-                                        {level.count}
-                                    </span>
-                                </div>
-                                <div className="flex items-center mb-1">
-                                    <i className={`fas fa-${level.iconClass} fa-fw mr-1 text-lg`}></i>
-                                    <p className="text-center font-medium">{level.label}</p>
-                                </div>
-                                <p className="text-gray-600">{level.percentage.toFixed(1)}%</p>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            );
-        };
-
-        const ServerCard = React.memo(({ server, expanded, onToggle, onGenerateSuggestions, suggestions, isGenerating }) => {
-            const performanceColor = 
-                server.average >= 0.9 ? 'bg-green-500' :
-                server.average >= 0.8 ? 'bg-blue-500' :
-                server.average >= 0.7 ? 'bg-yellow-500' :
-                server.average >= 0.6 ? 'bg-orange-500' : 'bg-red-500';
-                
-            const performanceText = 
-                server.average >= 0.9 ? 'ممتاز' :
-                server.average >= 0.8 ? 'جيد جداً' :
-                server.average >= 0.7 ? 'جيد' :
-                server.average >= 0.6 ? 'مقبول' : 'ضعيف';
-
-            return (
-                <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-100 overflow-hidden transform transition-all duration-300 hover:scale-102 hover:shadow-xl">
-                    <div className="p-6">
-                        <div className="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 className="font-bold text-lg text-gray-800 mb-1 truncate" title={server.fullName || server.name}>
-                                    {server.fullName || server.name}
-                                </h3>
-                                <div className="flex flex-wrap gap-2">
-                                    <span className="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-medium">
-                                        {server.service}
-                                    </span>
-                                    <span className="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-medium">
-                                        {server.class}
-                                    </span>
-                                </div>
-                            </div>
-                            <div className={`${performanceColor} text-white font-bold px-4 py-2 rounded-full text-sm flex-shrink-0`}>
-                                {(server.average * 100).toFixed(1)}%
-                            </div>
-                        </div>
-                        
-                        <div className="mt-4">
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm text-gray-600">مستوى الأداء</span>
-                                <span className="text-xs font-bold" style={{ 
-                                    color: server.average >= 0.9 ? '#10b981' :
-                                    server.average >= 0.8 ? '#3b82f6' :
-                                    server.average >= 0.7 ? '#f59e0b' :
-                                    server.average >= 0.6 ? '#f97316' : '#ef4444'
-                                }}>
-                                    {performanceText}
-                                </span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-3">
-                                <div 
-                                    className="h-3 rounded-full transition-all duration-500 ease-out" 
-                                    style={{ 
-                                        width: `${(server.average || 0) * 100}%`,
-                                        backgroundColor: 
-                                        server.average >= 0.9 ? '#10b981' :
-                                        server.average >= 0.8 ? '#3b82f6' :
-                                        server.average >= 0.7 ? '#f59e0b' :
-                                        server.average >= 0.6 ? '#f97316' : '#ef4444'
-                                    }}
-                                ></div>
-                            </div>
-                        </div>
-                        
-                        <button 
-                            onClick={onToggle}
-                            className="w-full mt-6 py-2 text-indigo-600 hover:text-indigo-800 flex items-center justify-center font-medium rounded-lg bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
-                        >
-                            {expanded ? 'إخفاء التفاصيل' : 'عرض التفاصيل'}
-                            {expanded ? <i className="fas fa-chevron-up fa-fw ml-1 text-sm"></i> : <i className="fas fa-chevron-down fa-fw ml-1 text-sm"></i>}
-                        </button>
-                    </div>
-                    
-                    {expanded && (
-                        <div className="bg-gray-50 p-6 border-t border-gray-100">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <h3 className="font-semibold text-green-700 mb-2 flex items-center">
-                                        <i className="fas fa-check-circle fa-fw ml-2 text-xl"></i>
-                                        نقاط القوة:
-                                    </h3>
-                                    <p className="text-gray-700 bg-green-50 p-3 rounded-lg text-sm whitespace-pre-wrap">{server.strengths || 'لا يوجد'}</p>
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold text-red-700 mb-2 flex items-center">
-                                        <i className="fas fa-times-circle fa-fw ml-2 text-xl"></i>
-                                        نقاط الضعف:
-                                    </h3>
-                                    <p className="text-gray-700 bg-red-50 p-3 rounded-lg text-sm whitespace-pre-wrap">{server.weaknesses || 'لا يوجد'}</p>
-                                </div>
-                                <div className="md:col-span-2">
-                                    <h3 className="font-semibold text-gray-700 mb-2 flex items-center">
-                                        <i className="fas fa-sticky-note fa-fw ml-2 text-xl"></i>
-                                        ملاحظات:
-                                    </h3>
-                                    <p className="text-gray-700 bg-gray-100 p-3 rounded-lg text-sm whitespace-pre-wrap">{server.notes || 'لا يوجد'}</p>
-                                </div>
-                                <div className="col-span-full">
-                                    <button
-                                        onClick={() => onGenerateSuggestions(server)}
-                                        className="w-full py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-300 transform hover:scale-105 shadow-md flex items-center justify-center"
-                                        disabled={isGenerating}
-                                    >
-                                        {isGenerating ? (
-                                            <>
-                                                <i className="fas fa-spinner fa-spin ml-2"></i>
-                                                جاري التوليد...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <i className="fas fa-magic ml-2"></i>
-                                                ✨ اقتراحات تحسين ✨
-                                            </>
-                                        )}
-                                    </button>
-                                    {suggestions && (
-                                        <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200 text-blue-800 text-sm whitespace-pre-wrap">
-                                            <h4 className="font-bold mb-2 flex items-center">
-                                                <i className="fas fa-lightbulb ml-2"></i>
-                                                اقتراحات الذكاء الاصطناعي:
-                                                <button onClick={() => onGenerateSuggestions(null)} className="mr-2 text-blue-600 hover:text-blue-800 text-xs">
-                                                    <i className="fas fa-times-circle"></i> مسح
-                                                </button>
-                                            </h4>
-                                            {suggestions}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        });
-
-        window.ServerEvaluationDashboard = ({ initialData }) => {
-            const [data, setData] = useState([]);
-            const [filteredData, setFilteredData] = useState([]);
+        /**
+         * Main React component for the Server Evaluation Dashboard.
+         * Manages data, filters, sorting, tabs, and renders charts and server lists.
+         * @param {Object} props - Component props.
+         * @param {Array<Object>} props.initialData - Initial data loaded from the Excel file.
+         */
+        window.ServerEvaluationDashboard = ({ initialData }) => { /* Made global for renderDashboard */
+            const [data, setData] = useState([]); // Original data from Excel
+            const [filteredData, setFilteredData] = useState([]); // Data after applying filters and sort
             const [selectedService, setSelectedService] = useState('الكل');
             const [selectedClass, setSelectedClass] = useState('الكل');
             const [loading, setLoading] = useState(true);
             const [expandedServers, setExpandedServers] = useState({});
-            const [activeTab, setActiveTab] = useState('dashboard');
-            const [performanceSort, setPerformanceSort] = useState('desc');
-            const [selectedServerFilter, setSelectedServerFilter] = useState('الكل');
+            const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard', 'servers', 'mindmap'
+            const [performanceSort, setPerformanceSort] = useState('desc'); // 'desc' for highest, 'asc' for lowest
+            const [selectedServerFilter, setSelectedServerFilter] = useState('الكل'); // For actual server filter
             const [isModalOpen, setIsModalOpen] = useState(false);
             const [modalContent, setModalContent] = useState({ level: null, servers: [] });
-            const [viewMode, setViewMode] = useState('grid');
-            const [message, setMessage] = useState(null);
-            const [generatedSuggestions, setGeneratedSuggestions] = useState({});
-            const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState({});
+            const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+            const [message, setMessage] = useState(null); // { type: 'success'|'error'|'info', text: '...' }
 
+            // State for AI suggestions
+            const [generatedSuggestions, setGeneratedSuggestions] = useState({}); // { serverName: "suggestions text" }
+            const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState({}); // { serverName: boolean }
+
+            // Refs for Chart.js canvases
             const radarChartRef = useRef(null);
             const serviceDoughnutChartRef = useRef(null); 
-            const chartInstance = useRef({});
+            const chartInstance = useRef({}); // To store Chart.js instances for multiple charts
 
+            // Diverse colors for charts
             const chartColors = [
                 '#6a11cb', '#2575fc', '#6dd5ed', '#4facfe', '#0cbaba', '#00c6fb', '#005bea', '#00d2ff',
                 '#ff7e5f', '#feb47b', '#ffc72c', '#f7b731', '#f97316', '#ff4b1f', '#f02fc2', '#6094ea'
             ];
             
-            window.showMessage = (type, text) => {
+            // Function to show custom message
+            window.showMessage = (type, text) => { // Made global for use in global script
                 setMessage({ type, text });
-                setTimeout(() => setMessage(null), 5000);
+                setTimeout(() => setMessage(null), 5000); // Clear after 5 seconds
             };
 
+            // Set initial data and loading state when initialData prop changes
             useEffect(() => {
                 if (initialData && initialData.length > 0) {
                     setData(initialData);
@@ -980,21 +914,26 @@
                 }
             }, [initialData]);
 
+            // Filtering and Sorting Logic: Recalculates filteredData whenever dependencies change
             useEffect(() => {
-                let currentFiltered = [...data];
+                let currentFiltered = [...data]; // Start with a copy of original data
 
+                // Apply Service Filter
                 if (selectedService !== 'الكل') {
                     currentFiltered = currentFiltered.filter(item => item.service === selectedService);
                 }
                 
+                // Apply Class Filter
                 if (selectedClass !== 'الكل') {
                     currentFiltered = currentFiltered.filter(item => item.class === selectedClass);
                 }
                 
+                // Apply Server Name Filter
                 if (selectedServerFilter !== 'الكل') {
                     currentFiltered = currentFiltered.filter(item => item.name === selectedServerFilter);
                 }
 
+                // Apply Sorting based on performanceSort state
                 const sortedData = [...currentFiltered].sort((a, b) => {
                     const scoreA = a.average || 0;
                     const scoreB = b.average || 0;
@@ -1002,13 +941,15 @@
                 });
 
                 setFilteredData(sortedData);
-            }, [data, selectedService, selectedClass, selectedServerFilter, performanceSort]);
+            }, [data, selectedService, selectedClass, selectedServerFilter, performanceSort]); // Dependencies for this effect
 
+            // Extract unique services from the data for filter dropdown
             const services = useMemo(() => {
                 const serviceSet = new Set(data.map(item => item.service).filter(s => s && s.trim() !== '' && s !== 'غير محدد'));
                 return ['الكل', ...Array.from(serviceSet)];
             }, [data]);
 
+            // Extract unique classes based on the selected service for filter dropdown
             const classesForService = useMemo(() => {
                 let classes = [];
                 if (selectedService === 'الكل') {
@@ -1023,11 +964,13 @@
                 return ['الكل', ...Array.from(classSet)];
             }, [data, selectedService]);
 
+            // Extract unique server names for filter dropdown
             const serverNames = useMemo(() => {
                 const nameSet = new Set(data.map(item => item.name).filter(n => n && n.trim() !== ''));
                 return ['الكل', ...Array.from(nameSet).sort()];
             }, [data]);
 
+            // Calculate general statistics based on filtered data
             const statistics = useMemo(() => {
                 if (filteredData.length === 0) {
                     return {
@@ -1071,6 +1014,7 @@
                 };
             }, [filteredData]);
 
+            // Prepare data for the Radar Chart (average scores per axis)
             const axisData = useMemo(() => {
                 if (filteredData.length === 0) return [];
                 
@@ -1084,7 +1028,7 @@
                 ];
                 
                 return axisNames.map((name, index) => {
-                    const axisKey = `axis${index + 1}`;
+                    const axisKey = `axis${index + 1}`; // Corresponds to axis1, axis2, etc.
                     const validValues = filteredData.filter(item => !isNaN(item[axisKey]) && item[axisKey] >= 0);
                     const avg = validValues.length > 0 
                         ? validValues.reduce((sum, item) => sum + item[axisKey], 0) / validValues.length 
@@ -1092,12 +1036,13 @@
                     
                     return {
                         axis: name,
-                        value: parseFloat((avg * 100).toFixed(1)),
-                        fullMark: 100
+                        value: parseFloat((avg * 100).toFixed(1)), // Convert to percentage for display
+                        fullMark: 100 // Max value for radar chart scale
                     };
                 });
             }, [filteredData]);
 
+            // Prepare data for the Service Distribution Doughnut Chart
             const serviceDoughnutData = useMemo(() => {
                 const serviceCounts = {};
                 filteredData.forEach(item => {
@@ -1112,21 +1057,24 @@
                     labels: labels,
                     datasets: [{
                         data: dataValues,
-                        backgroundColor: chartColors.slice(0, labels.length),
+                        backgroundColor: chartColors.slice(0, labels.length), // Use available colors
                         borderColor: '#fff',
                         borderWidth: 2,
                     }]
                 };
             }, [filteredData]);
 
+            // Effect hook for rendering the Radar Chart using Chart.js
             useEffect(() => {
                 if (radarChartRef.current && axisData.length > 0 && typeof Chart !== 'undefined') {
                     const ctx = radarChartRef.current.getContext('2d');
 
+                    // Destroy existing chart instance if it exists to prevent duplicates
                     if (chartInstance.current.radar) {
                         chartInstance.current.radar.destroy();
                     }
 
+                    // Create new Chart.js Radar Chart
                     chartInstance.current.radar = new Chart(ctx, {
                         type: 'radar',
                         data: {
@@ -1134,7 +1082,7 @@
                             datasets: [{
                                 label: 'متوسط التقييم',
                                 data: axisData.map(item => item.value),
-                                backgroundColor: 'rgba(136, 132, 216, 0.6)',
+                                backgroundColor: 'rgba(136, 132, 216, 0.6)', /* Consistent with header gradient */
                                 borderColor: '#6a11cb',
                                 borderWidth: 2,
                                 pointBackgroundColor: '#6a11cb',
@@ -1149,7 +1097,7 @@
                             scales: {
                                 r: {
                                     angleLines: {
-                                        color: '#e0e7ff'
+                                        color: '#e0e7ff' /* Lighter gray for grid */
                                     },
                                     grid: {
                                         color: '#e0e7ff'
@@ -1164,7 +1112,7 @@
                                     suggestedMin: 0,
                                     suggestedMax: 100,
                                     ticks: {
-                                        display: false
+                                        display: false // Hide ticks to keep it clean
                                     }
                                 }
                             },
@@ -1197,21 +1145,25 @@
                         }
                     });
                 }
+                // Cleanup function to destroy chart on component unmount or dependency change
                 return () => {
                     if (chartInstance.current.radar) {
                         chartInstance.current.radar.destroy();
                     }
                 };
-            }, [axisData, activeTab]);
+            }, [axisData, activeTab]); // Re-render if axisData or activeTab changes
 
+            // Effect hook for rendering the Doughnut Chart using Chart.js
             useEffect(() => {
                 if (serviceDoughnutChartRef.current && serviceDoughnutData.labels.length > 0 && typeof Chart !== 'undefined') {
                     const ctx = serviceDoughnutChartRef.current.getContext('2d');
 
+                    // Destroy existing chart instance if it exists
                     if (chartInstance.current.doughnut) {
                         chartInstance.current.doughnut.destroy();
                     }
 
+                    // Create new Chart.js Doughnut Chart
                     chartInstance.current.doughnut = new Chart(ctx, {
                         type: 'doughnut',
                         data: serviceDoughnutData,
@@ -1220,14 +1172,14 @@
                             maintainAspectRatio: false,
                             plugins: {
                                 legend: {
-                                    position: 'right',
+                                    position: 'right', // Position legend to the right
                                     labels: {
                                         font: {
-                                            family: 'Cairo, sans-serif', 
+                                            family: 'Cairo', 
                                         },
                                         color: '#374151',
                                     },
-                                    rtl: true,
+                                    rtl: true, // Enable RTL for legend
                                 },
                                 tooltip: {
                                     callbacks: {
@@ -1240,10 +1192,10 @@
                                         }
                                     },
                                     titleFont: {
-                                        family: 'Cairo, sans-serif'
+                                        family: 'Cairo',
                                     },
                                     bodyFont: {
-                                        family: 'Cairo, sans-serif'
+                                        family: 'Cairo',
                                     },
                                     rtl: true
                                 }
@@ -1251,13 +1203,16 @@
                         }
                     });
                 }
+                // Cleanup function
                 return () => {
                     if (chartInstance.current.doughnut) {
                         chartInstance.current.doughnut.destroy();
                     }
                 };
-            }, [serviceDoughnutData, activeTab]);
+            }, [serviceDoughnutData, activeTab]); // Re-render if serviceDoughnutData or activeTab changes
 
+
+            // Define performance levels and categorize filtered data into them
             const performanceLevels = useMemo(() => {
                 const levels = [
                     { label: 'ممتاز', min: 0.9, color: '#10b981', bgColor: 'bg-green-500', iconClass: 'star' },
@@ -1271,18 +1226,22 @@
                     const serversInLevel = filteredData.filter(item => 
                         !isNaN(item.average) &&
                         item.average >= level.min && 
-                        (!('max' in level) || item.average <= level.max)
+                        (!('max' in level) || item.average <= level.max) // Check max if defined
                     );
                     
                     return {
                         ...level,
                         count: serversInLevel.length,
                         percentage: filteredData.length > 0 ? (serversInLevel.length / filteredData.length) * 100 : 0,
-                        servers: serversInLevel
+                        servers: serversInLevel // Store the actual servers for the modal display
                     };
                 });
-            }, [filteredData]);
+            }, [filteredData]); // Recalculate if filteredData changes
 
+            /**
+             * Toggles the expansion state of a server's details.
+             * @param {string} name - The name of the server.
+             */
             const toggleServerDetails = (name) => {
                 setExpandedServers(prev => ({
                     ...prev,
@@ -1290,6 +1249,9 @@
                 }));
             };
 
+            /**
+             * Resets all filter and sort selections to their default values.
+             */
             const resetFilters = () => {
                 setSelectedService('الكل');
                 setSelectedClass('الكل');
@@ -1297,24 +1259,34 @@
                 setPerformanceSort('desc'); 
             };
 
+            /**
+             * Opens the server list modal with servers belonging to a specific performance level.
+             * @param {Object} level - The performance level object (e.g., { label: 'ممتاز', color: '#10b981', iconClass: 'star' }).
+             * @param {Array<Object>} servers - Array of server objects belonging to this level.
+             */
             const openServerListModal = (level) => {
                 setModalContent({ level: level, servers: level.servers });
                 setIsModalOpen(true);
             };
 
+            /**
+             * Closes the server list modal.
+             */
             const closeServerListModal = () => {
                 setIsModalOpen(false);
                 setModalContent({ level: null, servers: [] });
             };
 
+            /**
+             * Generates AI-powered suggestions for server improvement based on their data.
+             * Uses the Gemini API for text generation.
+             * Implements exponential backoff for API retries.
+             * @param {Object} server - The server object for which to generate suggestions.
+             * @returns {Promise<void>}
+             */
             const generateSuggestionsForServer = async (server) => {
-                if (!apiKey) {
-                    window.showMessage('error', 'مفتاح API غير متوفر لخدمة الذكاء الاصطناعي');
-                    return;
-                }
-
-                setIsGeneratingSuggestions(prev => ({ ...prev, [server.name]: true }));
-                setGeneratedSuggestions(prev => ({ ...prev, [server.name]: '' }));
+                setIsGeneratingSuggestions(prev => ({ ...prev, [server.name]: true })); // Set loading state for this server
+                setGeneratedSuggestions(prev => ({ ...prev, [server.name]: '' })); // Clear previous suggestions
 
                 const prompt = `
                 أنا أقيم أداء خادم في خدمة كنسية. بناءً على المعلومات التالية، يرجى تقديم 3-5 اقتراحات محددة وقابلة للتنفيذ لمساعدته على تحسين أدائه. ركز على الجوانب التي يمكن تطويرها بناءً على نقاط الضعف والملاحظات.
@@ -1332,11 +1304,12 @@
                 let chatHistory = [];
                 chatHistory.push({ role: "user", parts: [{ text: prompt }] });
                 const payload = { contents: chatHistory };
+                const apiKey = ""; // API key is provided by the environment if empty
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
                 let retries = 0;
                 const maxRetries = 5;
-                let delay = 1000;
+                let delay = 1000; // Initial delay of 1 second
 
                 while (retries < maxRetries) {
                     try {
@@ -1347,7 +1320,7 @@
                         });
 
                         if (!response.ok) {
-                            if (response.status === 429) {
+                            if (response.status === 429) { // Too Many Requests (rate limiting)
                                 throw new Error('Too Many Requests');
                             }
                             throw new Error(`HTTP error! status: ${response.status}`);
@@ -1359,7 +1332,7 @@
                             result.candidates[0].content.parts.length > 0) {
                             const text = result.candidates[0].content.parts[0].text;
                             setGeneratedSuggestions(prev => ({ ...prev, [server.name]: text }));
-                            break;
+                            break; // Success, exit retry loop
                         } else {
                             throw new Error('Unexpected API response structure or missing content');
                         }
@@ -1367,17 +1340,22 @@
                         console.error(`Error generating suggestions for ${server.name}:`, error);
                         retries++;
                         if (retries < maxRetries) {
-                            await new Promise(res => setTimeout(res, delay));
-                            delay *= 2;
+                            await new Promise(res => setTimeout(res, delay)); // Wait before retrying
+                            delay *= 2; // Exponential backoff
                         } else {
+                            // Max retries reached, display error message
                             window.showMessage('error', `حدث خطأ أثناء توليد الاقتراحات للخادم ${server.name}. يرجى المحاولة مرة أخرى.`);
                             setGeneratedSuggestions(prev => ({ ...prev, [server.name]: 'تعذر توليد الاقتراحات.' }));
                         }
                     }
                 }
-                setIsGeneratingSuggestions(prev => ({ ...prev, [server.name]: false }));
+                setIsGeneratingSuggestions(prev => ({ ...prev, [server.name]: false })); // Reset loading state
             };
 
+            /**
+             * Renders the doughnut chart for service distribution.
+             * @returns {JSX.Element} The doughnut chart component or a message if no data.
+             */
             const renderServiceDistributionChart = () => {
                 if (serviceDoughnutData.labels.length === 0) {
                     return <div className="text-center py-8 text-gray-500">لا توجد بيانات</div>;
@@ -1395,6 +1373,47 @@
                 );
             };
 
+            /**
+             * Renders the performance levels section with counts and percentages.
+             * @returns {JSX.Element} The performance levels section or null if no data.
+             */
+            const renderPerformanceLevels = () => {
+                if (performanceLevels.length === 0) {
+                    return null;
+                }
+                return (
+                    <div className="bg-gradient-to-br from-white to-gray-50 p-6 rounded-xl shadow-lg border border-gray-100 mb-6">
+                        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                            <i className="fas fa-chart-bar fa-fw ml-2 text-xl"></i>
+                            توزيع الدرجات حسب المستويات
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                            {performanceLevels.map((level, index) => (
+                                <button 
+                                    key={index} 
+                                    onClick={() => openServerListModal(level)}
+                                    className="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm border border-gray-100 transform transition-all duration-200 hover:scale-105 hover:shadow-md cursor-pointer"
+                                >
+                                    <div 
+                                        className="w-16 h-16 rounded-full flex items-center justify-center mb-2"
+                                        style={{ backgroundColor: level.color + '20', border: `2px solid ${level.color}` }}
+                                    >
+                                        <span className="font-bold text-lg" style={{ color: level.color }}>
+                                            {level.count}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center mb-1">
+                                        <i className={`fas fa-${level.iconClass} fa-fw mr-1 text-lg`}></i>
+                                        <p className="text-center font-medium">{level.label}</p>
+                                    </div>
+                                    <p className="text-gray-600">{level.percentage.toFixed(1)}%</p>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                );
+            };
+
             return (
                 <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100" dir="rtl">
                     {/* Navigation Header */}
@@ -1407,6 +1426,7 @@
                                 <h1 className="text-2xl font-bold">لوحة تقييم الخدام</h1>
                             </div>
                             <div className="flex space-x-4 tab-buttons">
+                                {/* Dashboard Tab Button */}
                                 <button 
                                     className={`px-4 py-2 rounded-lg flex items-center font-medium transition-all duration-200 ${activeTab === 'dashboard' ? 'bg-white text-purple-700 shadow-md' : 'text-white hover:bg-white/20'}`}
                                     onClick={() => setActiveTab('dashboard')}
@@ -1414,6 +1434,7 @@
                                     <i className="fas fa-chart-bar fa-fw ml-2 text-lg"></i>
                                     الإحصائيات
                                 </button>
+                                {/* Servers List Tab Button */}
                                 <button 
                                     className={`px-4 py-2 rounded-lg flex items-center font-medium transition-all duration-200 ${activeTab === 'servers' ? 'bg-white text-purple-700 shadow-md' : 'text-white hover:bg-white/20'}`}
                                     onClick={() => setActiveTab('servers')}
@@ -1421,6 +1442,7 @@
                                     <i className="fas fa-users fa-fw ml-2 text-lg"></i>
                                     قائمة الخدام
                                 </button>
+                                {/* Mind Map Tab Button */}
                                 <button 
                                     className={`px-4 py-2 rounded-lg flex items-center font-medium transition-all duration-200 ${activeTab === 'mindmap' ? 'bg-white text-purple-700 shadow-md' : 'text-white hover:bg-white/20'}`}
                                     onClick={() => setActiveTab('mindmap')}
@@ -1429,13 +1451,14 @@
                                     خريطة ذهنية
                                 </button>
                             </div>
+                            {/* Print/Save PDF Button */}
                             <div className="print-button-container">
                                 <button 
                                     onClick={() => window.print()}
                                     className="px-4 py-2 rounded-lg flex items-center font-medium bg-white text-purple-700 shadow-md hover:bg-gray-100 transition-all duration-200"
                                 >
                                     <i className="fas fa-print fa-fw ml-2 text-lg"></i>
-                                    طباعة / حفظ PDF
+                                    طباعة PDF
                                 </button>
                             </div>
                         </div>
@@ -1444,6 +1467,7 @@
                     {/* Main Content Area */}
                     <main className="container mx-auto px-4 py-8">
                         {loading ? (
+                            // Loading spinner when data is being processed
                             <div className="flex justify-center items-center h-64">
                                 <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-500"></div>
                             </div>
@@ -1451,6 +1475,7 @@
                             <>
                                 {/* Filter Section */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 filter-section">
+                                    {/* Service Type Filter */}
                                     <div className="bg-gradient-to-br from-white to-gray-50 p-4 rounded-xl shadow-md border border-gray-100">
                                         <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
                                             <i className="fas fa-tag fa-fw ml-2 text-lg text-purple-600"></i>
@@ -1472,6 +1497,7 @@
                                         </div>
                                     </div>
                                     
+                                    {/* Class Filter */}
                                     <div className="bg-gradient-to-br from-white to-gray-50 p-4 rounded-xl shadow-md border border-gray-100">
                                         <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
                                             <i className="fas fa-school fa-fw ml-2 text-lg text-purple-600"></i>
@@ -1493,10 +1519,11 @@
                                         </div>
                                     </div>
                                     
+                                    {/* Server Name Filter */}
                                     <div className="bg-gradient-to-br from-white to-gray-50 p-4 rounded-xl shadow-md border border-gray-100">
                                         <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
                                             <i className="fas fa-user-circle fa-fw ml-2 text-lg text-purple-600"></i>
-                                            فلتر باسم الخادم
+                                             اســم الخادم
                                         </label>
                                         <div className="relative">
                                             <select 
@@ -1514,6 +1541,7 @@
                                         </div>
                                     </div>
                                     
+                                    {/* Reset Filters Button */}
                                     <div className="flex items-end">
                                         <button 
                                             onClick={resetFilters}
@@ -1525,13 +1553,16 @@
                                     </div>
                                 </div>
 
+                                {/* Conditional rendering based on activeTab */}
                                 {activeTab === 'dashboard' ? (
                                     <>
+                                        {/* General Statistics Section */}
                                         {statistics && statistics.totalServers > 0 ? (
                                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                                                {/* Total Servers Card */}
                                                 <div className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-2xl shadow-lg border border-gray-100 flex items-center transform transition-all duration-300 hover:scale-102 hover:shadow-xl">
                                                     <div className="bg-blue-100 p-3 rounded-xl mr-4 flex-shrink-0">
-                                                        <i className="fas fa-user-friends text-blue-600 text-2xl"></i>
+                                                        <i className="fas fa-users text-blue-600 text-3xl"></i>
                                                     </div>
                                                     <div>
                                                         <p className="text-gray-500 text-sm">عدد الخدام</p>
@@ -1539,9 +1570,10 @@
                                                     </div>
                                                 </div>
                                                 
+                                                {/* Average Score Card */}
                                                 <div className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-2xl shadow-lg border border-gray-100 flex items-center transform transition-all duration-300 hover:scale-102 hover:shadow-xl">
                                                     <div className="bg-green-100 p-3 rounded-xl mr-4 flex-shrink-0">
-                                                        <i className="fas fa-chart-line text-green-600 text-2xl"></i>
+                                                        <i className="fas fa-chart-line text-green-600 text-3xl"></i>
                                                     </div>
                                                     <div>
                                                         <p className="text-gray-500 text-sm">متوسط التقييم</p>
@@ -1549,9 +1581,10 @@
                                                     </div>
                                                 </div>
                                                 
+                                                {/* Top Performer Card */}
                                                 <div className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-2xl shadow-lg border border-gray-100 flex items-center transform transition-all duration-300 hover:scale-102 hover:shadow-xl">
                                                     <div className="bg-yellow-100 p-3 rounded-xl mr-4 flex-shrink-0">
-                                                        <i className="fas fa-trophy text-yellow-600 text-2xl"></i>
+                                                        <i className="fas fa-trophy text-yellow-600 text-3xl"></i>
                                                     </div>
                                                     <div>
                                                         <p className="text-gray-500 text-sm">أعلى تقييم</p>
@@ -1560,9 +1593,10 @@
                                                     </div>
                                                 </div>
                                                 
+                                                {/* Excellent Servers Count Card */}
                                                 <div className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-2xl shadow-lg border border-gray-100 flex items-center transform transition-all duration-300 hover:scale-102 hover:shadow-xl">
                                                     <div className="bg-purple-100 p-3 rounded-xl mr-4 flex-shrink-0">
-                                                        <i className="fas fa-star text-purple-600 text-2xl"></i>
+                                                        <i className="fas fa-star text-purple-600 text-3xl"></i>
                                                     </div>
                                                     <div>
                                                         <p className="text-gray-500 text-sm">ممتاز</p>
@@ -1572,6 +1606,7 @@
                                                 </div>
                                             </div>
                                         ) : (
+                                            // Message when no data matches filters
                                             <div className="bg-gradient-to-br from-white to-gray-50 p-8 rounded-xl shadow-lg border border-gray-100 text-center mb-8">
                                                 <i className="fas fa-exclamation-triangle fa-fw mx-auto text-gray-400 mb-4 text-5xl"></i>
                                                 <h3 className="text-xl font-bold text-gray-700">لا توجد بيانات</h3>
@@ -1585,7 +1620,9 @@
                                             </div>
                                         )}
 
+                                        {/* Charts Section */}
                                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                                            {/* Radar Chart for Axis Evaluation */}
                                             <div className="bg-gradient-to-br from-white to-gray-50 p-6 rounded-2xl shadow-lg border border-gray-100">
                                                 <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
                                                     <i className="fas fa-chart-area fa-fw ml-2 text-xl"></i>
@@ -1602,11 +1639,12 @@
                                                 )}
                                             </div>
                                             
+                                            {/* Top/Bottom All Servers List (Removed slice(0,15)) */}
                                             <div className="bg-gradient-to-br from-white to-gray-50 p-6 rounded-2xl shadow-lg border border-gray-100">
                                                 <div className="flex justify-between items-center mb-4">
                                                     <h2 className="text-xl font-bold text-gray-800 flex items-center">
                                                         <i className="fas fa-medal fa-fw ml-2 text-xl"></i>
-                                                        أداء الخدام (الأعلى/الأدنى 15)
+                                                        أداء الخدام (حسب الفلتر)
                                                     </h2>
                                                     <div className="flex space-x-2 bg-gray-100 rounded-lg p-1 shadow-inner">
                                                         <button 
@@ -1616,7 +1654,7 @@
                                                             الأعلى
                                                         </button>
                                                         <button 
-                                                            className={`px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 ${performanceSort === 'asc' ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200'}`}
+                                                            className={`px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 ${performanceSort === 'asc' ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-300'}`}
                                                             onClick={() => setPerformanceSort('asc')}
                                                         >
                                                             الأدنى
@@ -1625,7 +1663,7 @@
                                                 </div>
                                                 {filteredData.length > 0 ? ( 
                                                     <div className="h-[300px] overflow-y-auto pr-2">
-                                                        {filteredData.slice(0, 15).map((server, index) => ( 
+                                                        {filteredData.map((server, index) => ( 
                                                             <div key={index} className="flex items-center mb-4 p-3 hover:bg-gray-100 rounded-lg transition-colors duration-150">
                                                                 <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-3 flex-shrink-0">
                                                                     <span className="font-bold text-purple-700">{index + 1}</span>
@@ -1659,17 +1697,15 @@
                                             </div>
                                         </div>
 
-                                        {performanceLevels.length > 0 && (
-                                            <PerformanceLevels 
-                                                levels={performanceLevels} 
-                                                onLevelClick={openServerListModal} 
-                                            />
-                                        )}
+                                        {/* Performance Levels Distribution */}
+                                        {performanceLevels.length > 0 && renderPerformanceLevels()}
 
+                                        {/* Service Distribution Doughnut Chart */}
                                         {serviceDoughnutData.labels.length > 0 && renderServiceDistributionChart()}
                                     </>
                                 ) : activeTab === 'servers' ? (
                                     <>
+                                        {/* Servers List Header with View Mode and Sort Options */}
                                         <div className="flex justify-between items-center mb-6">
                                             <h2 className="text-2xl font-bold text-gray-800 flex items-center">
                                                 <i className="fas fa-list-alt fa-fw ml-2 text-xl"></i>
@@ -1677,6 +1713,7 @@
                                             </h2>
                                             
                                             <div className="flex items-center space-x-4">
+                                                {/* View Mode Toggle */}
                                                 <div className="flex items-center">
                                                     <label className="mr-2 text-gray-700 font-medium">طريقة العرض:</label>
                                                     <div className="flex bg-gray-200 rounded-lg overflow-hidden shadow-inner">
@@ -1695,6 +1732,7 @@
                                                     </div>
                                                 </div>
                                                 
+                                                {/* Performance Sort Toggle */}
                                                 <div className="flex items-center">
                                                     <label className="mr-2 text-gray-700 font-medium">الترتيب:</label>
                                                     <div className="flex bg-gray-200 rounded-lg overflow-hidden shadow-inner">
@@ -1715,7 +1753,9 @@
                                             </div>
                                         </div>
                                         
+                                        {/* Conditional rendering for Grid or List view */}
                                         {filteredData.length === 0 ? (
+                                            // Message when no servers match filters
                                             <div className="bg-gradient-to-br from-white to-gray-50 p-8 rounded-xl shadow-lg border border-gray-100 text-center">
                                                 <i className="fas fa-exclamation-triangle fa-fw mx-auto text-gray-400 mb-4 text-5xl"></i>
                                                 <h3 className="text-xl font-bold text-gray-700">لا توجد بيانات</h3>
@@ -1729,17 +1769,128 @@
                                             </div>
                                         ) : (
                                             viewMode === 'grid' ? (
+                                                // Grid View for Servers
                                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                                     {filteredData.map((server, index) => (
-                                                        <ServerCard 
-                                                            key={index}
-                                                            server={server}
-                                                            expanded={expandedServers[server.name]}
-                                                            onToggle={() => toggleServerDetails(server.name)}
-                                                            onGenerateSuggestions={generateSuggestionsForServer}
-                                                            suggestions={generatedSuggestions[server.name]}
-                                                            isGenerating={isGeneratingSuggestions[server.name]}
-                                                        />
+                                                        <div key={index} className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-100 overflow-hidden transform transition-all duration-300 hover:scale-102 hover:shadow-xl">
+                                                            <div className="p-6">
+                                                                <div className="flex justify-between items-start mb-4">
+                                                                    <div>
+                                                                        <h3 className="font-bold text-lg text-gray-800 mb-1 truncate" title={server.fullName || server.name}>
+                                                                            {server.fullName || server.name}
+                                                                        </h3>
+                                                                        <div className="flex flex-wrap gap-2">
+                                                                            <span className="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-medium">
+                                                                                {server.service}
+                                                                            </span>
+                                                                            <span className="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-medium">
+                                                                                {server.class}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="bg-indigo-100 text-indigo-800 font-bold px-4 py-2 rounded-full text-sm flex-shrink-0">
+                                                                        {(server.average * 100).toFixed(1)}%
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <div className="mt-4">
+                                                                    <div className="flex items-center justify-between mb-2">
+                                                                        <span className="text-sm text-gray-600">مستوى الأداء</span>
+                                                                        <span className="text-xs font-bold" style={{ 
+                                                                            color: server.average >= 0.9 ? '#10b981' :
+                                                                            server.average >= 0.8 ? '#3b82f6' :
+                                                                            server.average >= 0.7 ? '#f59e0b' :
+                                                                            server.average >= 0.6 ? '#f97316' : '#ef4444'
+                                                                        }}>
+                                                                            {server.average >= 0.9 ? 'ممتاز' :
+                                                                            server.average >= 0.8 ? 'جيد جداً' :
+                                                                            server.average >= 0.7 ? 'جيد' :
+                                                                            server.average >= 0.6 ? 'مقبول' : 'ضعيف'}
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className="w-full bg-gray-200 rounded-full h-3">
+                                                                        <div 
+                                                                            className="h-3 rounded-full transition-all duration-500 ease-out" 
+                                                                            style={{ 
+                                                                                width: `${(server.average || 0) * 100}%`,
+                                                                                backgroundColor: 
+                                                                                (server.average || 0) >= 0.9 ? '#10b981' :
+                                                                                (server.average || 0) >= 0.8 ? '#3b82f6' :
+                                                                                (server.average || 0) >= 0.7 ? '#f59e0b' :
+                                                                                (server.average || 0) >= 0.6 ? '#f97316' : '#ef4444'
+                                                                            }}
+                                                                        ></div>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <button 
+                                                                    onClick={() => toggleServerDetails(server.name)}
+                                                                    className="w-full mt-6 py-2 text-indigo-600 hover:text-indigo-800 flex items-center justify-center font-medium rounded-lg bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
+                                                                >
+                                                                    {expandedServers[server.name] ? 'إخفاء التفاصيل' : 'عرض التفاصيل'}
+                                                                    {expandedServers[server.name] ? <i className="fas fa-chevron-up fa-fw ml-1 text-sm"></i> : <i className="fas fa-chevron-down fa-fw ml-1 text-sm"></i>}
+                                                                </button>
+                                                            </div>
+                                                            
+                                                            {expandedServers[server.name] && (
+                                                                <div className="bg-gray-50 p-6 border-t border-gray-100">
+                                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                        <div>
+                                                                            <h3 className="font-semibold text-green-700 mb-2 flex items-center">
+                                                                                <i className="fas fa-check-circle fa-fw ml-2 text-xl"></i>
+                                                                                نقاط القوة:
+                                                                            </h3>
+                                                                            <p className="text-gray-700 bg-green-50 p-3 rounded-lg text-sm whitespace-pre-wrap">{server.strengths || 'لا يوجد'}</p>
+                                                                        </div>
+                                                                        <div>
+                                                                            <h3 className="font-semibold text-red-700 mb-2 flex items-center">
+                                                                                <i className="fas fa-times-circle fa-fw ml-2 text-xl"></i>
+                                                                                نقاط الضعف:
+                                                                            </h3>
+                                                                            <p className="text-gray-700 bg-red-50 p-3 rounded-lg text-sm whitespace-pre-wrap">{server.weaknesses || 'لا يوجد'}</p>
+                                                                        </div>
+                                                                        <div className="md:col-span-2">
+                                                                            <h3 className="font-semibold text-gray-700 mb-2 flex items-center">
+                                                                                <i className="fas fa-sticky-note fa-fw ml-2 text-xl"></i>
+                                                                                ملاحظات:
+                                                                            </h3>
+                                                                            <p className="text-gray-700 bg-gray-100 p-3 rounded-lg text-sm whitespace-pre-wrap">{server.notes || 'لا يوجد'}</p>
+                                                                        </div>
+                                                                        <div className="col-span-full">
+                                                                            <button
+                                                                                onClick={() => generateSuggestionsForServer(server)}
+                                                                                className="w-full py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-300 transform hover:scale-105 shadow-md flex items-center justify-center"
+                                                                                disabled={isGeneratingSuggestions[server.name]}
+                                                                            >
+                                                                                {isGeneratingSuggestions[server.name] ? (
+                                                                                    <>
+                                                                                        <i className="fas fa-spinner fa-spin ml-2"></i>
+                                                                                        جاري التوليد...
+                                                                                    </>
+                                                                                ) : (
+                                                                                    <>
+                                                                                        <i className="fas fa-magic ml-2"></i>
+                                                                                        ✨ اقتراحات تحسين ✨
+                                                                                    </>
+                                                                                )}
+                                                                            </button>
+                                                                            {generatedSuggestions[server.name] && (
+                                                                                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200 text-blue-800 text-sm whitespace-pre-wrap">
+                                                                                    <h4 className="font-bold mb-2 flex items-center">
+                                                                                        <i className="fas fa-lightbulb ml-2"></i>
+                                                                                        اقتراحات الذكاء الاصطناعي:
+                                                                                        <button onClick={() => setGeneratedSuggestions(prev => ({ ...prev, [server.name]: '' }))} className="mr-2 text-blue-600 hover:text-blue-800 text-xs">
+                                                                                            <i className="fas fa-times-circle"></i> مسح
+                                                                                        </button>
+                                                                                    </h4>
+                                                                                    {generatedSuggestions[server.name]}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     ))}
                                                 </div>
                                             ) : (
@@ -1864,12 +2015,11 @@
                                         )}
                                     </>
                                 ) : activeTab === 'mindmap' ? (
-                                    <MindMap data={filteredData} /> 
+                                    <MindMap data={filteredData} selectedService={selectedService} /> 
                                 ) : null}
                             </>
                         )}
                     </main>
-                    
                     {/* Server List Modal */}
                     {isModalOpen && (
                         <ServerListModal 
@@ -1879,7 +2029,6 @@
                             servers={modalContent.servers} 
                         />
                     )}
-                    
                     {/* Custom Message Display */}
                     <CustomMessage message={message} onClose={() => setMessage(null)} />
                 </div>
@@ -1887,21 +2036,41 @@
         };
     </script>
 
-    <!-- Initialization Script -->
+    <!-- Initialization Script (must be defined after React components) -->
     <script>
+        /**
+         * Renders the React dashboard with the provided data.
+         * @param {Array} dataToDisplay - The data to be displayed in the dashboard.
+         */
         const renderDashboard = (dataToDisplay) => {
+            console.log('renderDashboard called with data:', dataToDisplay); // Added log
             const rootElement = document.getElementById('react-dashboard-root');
-            if (!reactRoot) {
-                reactRoot = ReactDOM.createRoot(rootElement);
+            if (!rootElement) {
+                console.error('React root element not found!');
+                return; // Exit if root element is not found
             }
-            globalDashboardData = dataToDisplay;
+            if (!reactRoot) {
+                // Create a React root if it's doesn't exist
+                reactRoot = ReactDOM.createRoot(rootElement);
+                console.log('React root created.'); // Added log
+            }
+            globalDashboardData = dataToDisplay; // Store data globally
+            // Render the ServerEvaluationDashboard React component with the initial data
+            // ServerEvaluationDashboard is now defined globally via window.ServerEvaluationDashboard
             reactRoot.render(React.createElement(window.ServerEvaluationDashboard, { initialData: dataToDisplay }));
         };
 
+        // Initial render: show file upload section on DOMContentLoaded
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('fileUploadSection').style.display = 'block';
             document.getElementById('loadingScreen').style.display = 'none';
-            renderDashboard([]);
+            // Wait for window.ServerEvaluationDashboard to be defined before rendering
+            const checkReactReady = setInterval(() => {
+                if (window.ServerEvaluationDashboard) {
+                    clearInterval(checkReactReady);
+                    renderDashboard([]); // Render an empty dashboard initially
+                }
+            }, 50); // Check every 50ms
         });
     </script>
 </body>
