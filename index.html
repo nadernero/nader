@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts - Cairo -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome 6 CDN for professional icons (corrected integrity attribute) -->
+    <!-- Font Awesome 6 CDN for professional icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" xintegrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0V4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- XLSX library for reading Excel files -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -21,66 +21,45 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
-        /* CSS Variables for consistent theming */
-        :root {
-            --primary-purple: #6a11cb;
-            --secondary-blue: #2575fc;
-            --gradient-start: #4a00e0; /* Deeper purple */
-            --gradient-end: #8e2de2;   /* Richer purple */
-            --light-blue-bg: #e0e7ff;
-            --dark-text: #333;
-            --light-text: #6b7280;
-            --border-color: #a7c0f0;
-            --background-light: #f0f2f5;
-            --card-bg: #ffffff;
-            --shadow-color: rgba(0,0,0,0.08);
-            --hover-shadow-color: rgba(0,0,0,0.15);
-        }
-
         body {
             font-family: 'Cairo', sans-serif;
-            background-color: var(--background-light);
-            direction: rtl; /* Ensure RTL for the entire body */
+            background-color: #f0f2f5; /* Light gray background */
         }
         .gradient-bg {
-            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            background: linear-gradient(135deg, #4a00e0 0%, #8e2de2 100%); /* Deeper, richer gradient */
         }
         .card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            box-shadow: 0 8px 20px var(--shadow-color);
+            background: white;
+            border-radius: 16px; /* Slightly smaller radius for modern look */
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08); /* Softer shadow */
             padding: 24px;
             margin-bottom: 24px;
             transition: all 0.3s ease;
         }
-        .card:hover {
-            box-shadow: 0 12px 25px var(--hover-shadow-color);
-            transform: translateY(-3px);
-        }
         .file-input {
-            border: 2px dashed var(--primary-purple);
+            border: 2px dashed #6a11cb; /* Darker purple dashed border */
             border-radius: 12px;
             padding: 40px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            background-color: var(--card-bg);
+            background-color: #ffffff;
         }
         .file-input:hover {
-            border-color: var(--secondary-blue);
+            border-color: #2575fc; /* Blue on hover */
             background-color: #eef2ff; /* Light blue tint */
         }
         .loading-screen {
             display: none;
             text-align: center;
             padding: 40px;
-            background-color: var(--card-bg);
+            background-color: #ffffff;
             border-radius: 16px;
-            box-shadow: 0 8px 20px var(--shadow-color);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
         }
         .spinner {
             border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary-purple);
+            border-top: 4px solid #6a11cb; /* Consistent spinner color */
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -101,7 +80,7 @@
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb {
-            background: #a0a0a0;
+            background: #a0a0a0; /* Darker scrollbar thumb */
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
@@ -150,22 +129,14 @@
             font-family: 'Cairo', sans-serif;
             font-size: 14px;
             font-weight: 600;
-            fill: var(--dark-text);
+            fill: #333; /* Default text color, overridden by inline style for items */
             text-anchor: middle;
             transition: fill 0.3s ease;
-            user-select: none; /* Prevent text selection */
+            cursor: pointer; /* Indicate clickable */
         }
-        /* Specific text colors for root and categories for better contrast */
-        .mind-map-node-text.root {
-            fill: #ffffff;
+        .mind-map-node-text:hover {
+            fill: #4a00e0;
         }
-        .mind-map-node-text.category {
-            fill: var(--dark-text); /* Ensure dark text on colored category nodes */
-        }
-        .mind-map-node-text.item {
-            fill: var(--dark-text); /* Ensure dark text on colored item nodes */
-        }
-
         .mind-map-line {
             stroke: #c0c0c0;
             stroke-width: 1.5;
@@ -173,33 +144,29 @@
             transition: stroke 0.3s ease, stroke-width 0.3s ease;
         }
         .mind-map-line:hover {
-            stroke: var(--gradient-end);
+            stroke: #8e2de2;
             stroke-width: 2.5;
         }
         .mind-map-rect {
-            fill: var(--light-blue-bg);
-            stroke: var(--border-color);
+            fill: #e0e7ff; /* Default fill, overridden by inline style */
+            stroke: #a7c0f0; /* Slightly darker border */
             stroke-width: 1;
-            rx: 8;
+            rx: 8; /* Rounded corners */
             ry: 8;
             transition: fill 0.3s ease, stroke 0.3s ease;
-            filter: url(#shadow); /* Apply shadow filter */
+            cursor: pointer; /* Indicate clickable */
         }
         .mind-map-rect:hover {
-            fill: #c7d8ff;
-            stroke: var(--primary-purple);
+            fill: #c7d8ff; /* Darker blue on hover */
+            stroke: #6a11cb;
         }
-        /* Specific rect colors for root and categories/items based on performance */
-        .mind-map-rect.root {
-            fill: var(--primary-purple); /* Default root color */
-            stroke: var(--gradient-start);
-        }
-        .mind-map-node-icon {
-            color: var(--primary-purple);
-        }
-        .mind-map-node-icon.root {
-            color: white;
-        }
+        /* Specific styles for root/category/item are now mostly handled by inline styles */
+        /* .mind-map-rect.root { ... } */
+        /* .mind-map-node-text.root { ... } */
+        /* .mind-map-rect.category { ... } */
+        /* .mind-map-node-text.category { ... } */
+        /* .mind-map-rect.item { ... } */
+        /* .mind-map-node-text.item { ... } */
 
         /* Print specific styles */
         @media print {
@@ -285,9 +252,9 @@
             </div>
             <div>
               <h3 class="text-lg font-bold mb-4">اتصل بنا</h3>
-              <p class="text-indigo-100"><i class="fas fa-at fa-fw ml-2"></i>البريد الإلكتروني: nadernero2003@gmail.com</p>
-              <p class="text-indigo-100"><i class="fas fa-phone fa-fw ml-2"></i>الهاتف: 01273332947</p>
-              <p class="text-indigo-100"><i class="fas fa-map-marker-alt fa-fw ml-2"></i>العنوان: العبور، مصر</p>
+              <p class="text-indigo-100"><i class="fas fa-at fa-fw ml-2"></i>البريد الإلكتروني: info@evaluation.com</p>
+              <p class="text-indigo-100"><i class="fas fa-phone fa-fw ml-2"></i>الهاتف: +20 123 456 7890</p>
+              <p class="text-indigo-100"><i class="fas fa-map-marker-alt fa-fw ml-2"></i>العنوان: القاهرة، مصر</p>
             </div>
           </div>
           <div class="border-t border-indigo-700 mt-8 pt-6 text-center text-indigo-200">
@@ -551,318 +518,6 @@
         };
 
         /**
-         * Calculates the path for a Bézier curve between two points.
-         * @param {Object} source - The source point {x, y}.
-         * @param {Object} target - The target point {x, y}.
-         * @returns {string} The SVG path string.
-         */
-        const calculateBezierPath = (source, target) => {
-            const controlPointX = source.x + (target.x - source.x) * 0.5;
-            return `M${source.x},${source.y} C${controlPointX},${source.y} ${controlPointX},${target.y} ${target.x},${target.y}`;
-        };
-
-        /**
-         * React component for rendering a dynamic Mind Map using SVG.
-         * Displays filtered data categories and sample items.
-         * @param {Object} props - Component props.
-         * @param {Array<Object>} props.data - The filtered data to display in the mind map.
-         * @param {string} props.selectedService - The currently selected service from the filter.
-         */
-        const MindMap = ({ data, selectedService }) => { 
-            const svgRef = useRef(null);
-            const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
-            
-            // Define performance levels for color coding
-            const performanceColors = useMemo(() => ({
-                excellent: '#10b981', // green
-                veryGood: '#3b82f6',  // blue
-                good: '#f59e0b',      // yellow
-                acceptable: '#f97316', // orange
-                weak: '#ef4444'       // red
-            }), []);
-
-            const getNodeColor = useCallback((average) => {
-                if (average >= 0.9) return performanceColors.excellent;
-                if (average >= 0.8) return performanceColors.veryGood;
-                if (average >= 0.7) return performanceColors.good;
-                if (average >= 0.6) return performanceColors.acceptable;
-                return performanceColors.weak;
-            }, [performanceColors]);
-
-            // Prepare hierarchical data for the mind map
-            const mindMapData = useMemo(() => {
-                const nodes = new Map();
-                const links = [];
-
-                // If no specific service is selected, show a prompt or a generic root
-                if (selectedService === 'الكل' || !selectedService || data.length === 0) {
-                    const root = { id: 'root-prompt', label: 'الرجاء اختيار خدمة لعرض الخريطة الذهنية', type: 'root', children: [], icon: 'fas fa-info-circle' };
-                    nodes.set(root.id, root);
-                    return { nodes, links };
-                }
-
-                // Filter data for the selected service
-                const serviceData = data.filter(d => d.service === selectedService);
-                if (serviceData.length === 0) {
-                    const root = { id: 'root-no-data', label: `لا توجد بيانات للخادمة: ${selectedService}`, type: 'root', children: [], icon: 'fas fa-exclamation-triangle' };
-                    nodes.set(root.id, root);
-                    return { nodes, links };
-                }
-
-                // Calculate average for the selected service
-                const serviceAverage = serviceData.reduce((sum, item) => sum + item.average, 0) / serviceData.length;
-                const serviceLabel = `${selectedService} (${(serviceAverage * 100).toFixed(1)}%)`;
-                const serviceNodeColor = getNodeColor(serviceAverage);
-
-                // 1. Root Node: Selected Service
-                const root = { id: 'service-root', label: serviceLabel, type: 'root', children: [], icon: 'fas fa-tags', average: serviceAverage, color: serviceNodeColor };
-                nodes.set(root.id, root);
-
-                // 2. Level 1: Classes within the selected service
-                const uniqueClasses = Array.from(new Set(serviceData.map(d => d.class).filter(c => c && c.trim() !== '' && c !== 'غير محدد')));
-                
-                uniqueClasses.forEach(cls => {
-                    const classServers = serviceData.filter(d => d.class === cls);
-                    const classAverage = classServers.reduce((sum, item) => sum + item.average, 0) / classServers.length;
-                    const classLabel = `${cls} (${(classAverage * 100).toFixed(1)}%)`;
-                    const classNodeColor = getNodeColor(classAverage);
-
-                    const classNode = { id: `class-${cls}`, label: classLabel, type: 'category', parentId: root.id, average: classAverage, color: classNodeColor };
-                    nodes.set(classNode.id, classNode);
-                    root.children.push(classNode.id);
-                    links.push({ source: root.id, target: classNode.id });
-
-                    // 3. Level 2: Servers within each class
-                    classServers.forEach(server => {
-                        const serverLabel = `${server.name} (${(server.average * 100).toFixed(1)}%)`;
-                        const serverNodeColor = getNodeColor(server.average);
-                        const serverNode = { id: `server-${server.name}`, label: serverLabel, type: 'item', parentId: classNode.id, average: server.average, color: serverNodeColor };
-                        nodes.set(serverNode.id, serverNode);
-                        links.push({ source: classNode.id, target: serverNode.id });
-                    });
-                });
-
-                return { nodes, links };
-            }, [data, selectedService, getNodeColor]);
-
-            // Effect to update SVG dimensions on window resize and data change
-            useEffect(() => {
-                const updateDimensions = () => {
-                    if (svgRef.current && svgRef.current.parentElement) {
-                        const parentWidth = svgRef.current.parentElement.clientWidth;
-                        const parentHeight = svgRef.current.parentElement.clientHeight;
-
-                        let requiredWidth = 0;
-                        let requiredHeight = 0;
-
-                        const rootNode = mindMapData.nodes.get('service-root') || mindMapData.nodes.get('root-prompt') || mindMapData.nodes.get('root-no-data');
-                        if (rootNode) {
-                            // Estimate root node width
-                            const rootTextWidth = rootNode.label.length * 8 + 30; // approx char width + icon space
-                            requiredWidth += Math.max(120, rootTextWidth); // Root node width
-                            requiredWidth += 100; // Spacing after root
-
-                            const classNodes = Array.from(mindMapData.nodes.values()).filter(node => node.type === 'category' && node.parentId === rootNode.id);
-                            
-                            let maxClassHeight = 0;
-                            let currentX = requiredWidth; // Start X for classes
-
-                            classNodes.forEach(classNode => {
-                                const classTextWidth = classNode.label.length * 8 + 20;
-                                const classNodeWidth = Math.max(120, classTextWidth);
-                                
-                                currentX += classNodeWidth + 50; // Add class node width + spacing
-                                
-                                const serverNodes = Array.from(mindMapData.nodes.values()).filter(node => node.type === 'item' && node.parentId === classNode.id);
-                                const serversHeight = serverNodes.length * 40 + (serverNodes.length > 0 ? 60 : 0); // Server nodes height + initial offset
-                                maxClassHeight = Math.max(maxClassHeight, serversHeight);
-                            });
-
-                            requiredWidth = currentX; // Total width for classes and their servers
-                            requiredHeight = 100 + maxClassHeight; // Base height + max height of any class branch
-
-                            // Ensure minimum dimensions
-                            requiredWidth = Math.max(parentWidth, requiredWidth, 800);
-                            requiredHeight = Math.max(parentHeight, requiredHeight, 600);
-                        } else {
-                            // If no data or prompt, use default parent dimensions
-                            requiredWidth = parentWidth;
-                            requiredHeight = parentHeight;
-                        }
-                        
-                        setDimensions({
-                            width: requiredWidth,
-                            height: requiredHeight
-                        });
-                    }
-                };
-                updateDimensions(); // Initial dimensions
-                window.addEventListener('resize', updateDimensions); // Add resize listener
-                // Re-calculate dimensions when mindMapData changes
-                const timeoutId = setTimeout(updateDimensions, 100); // Small delay to ensure nodes are in DOM for textWidth calculation if needed
-                return () => {
-                    window.removeEventListener('resize', updateDimensions);
-                    clearTimeout(timeoutId);
-                };
-            }, [mindMapData]); // Dependency on mindMapData
-
-            // Calculate positions for nodes
-            const positionedNodes = useMemo(() => {
-                const nodesMap = mindMapData.nodes;
-                const calculatedPositions = new Map();
-
-                const rootNode = nodesMap.get('service-root') || nodesMap.get('root-prompt') || nodesMap.get('root-no-data');
-                if (!rootNode) return calculatedPositions;
-
-                // Start root node on the far left, vertically centered
-                const rootX = 150; // Fixed X for root
-                const rootY = dimensions.height / 2;
-                calculatedPositions.set(rootNode.id, { x: rootX, y: rootY });
-
-                // Position Level 1 (Classes) horizontally to the right of the root
-                const classNodes = Array.from(nodesMap.values()).filter(node => node.type === 'category' && node.parentId === rootNode.id);
-                
-                let currentClassX = rootX + 250; // Start classes 250px to the right of the root
-                const classVerticalSpacing = 100; // Vertical spacing between class nodes
-                
-                // Calculate total height needed for all class branches to center them
-                let totalClassesHeight = 0;
-                classNodes.forEach(classNode => {
-                    const serverNodes = Array.from(nodesMap.values()).filter(node => node.type === 'item' && node.parentId === classNode.id);
-                    totalClassesHeight += (serverNodes.length * 40) + (serverNodes.length > 0 ? 60 : 0) + 40; // Servers height + initial offset + class node height
-                });
-                const initialClassY = rootY - (totalClassesHeight / 2) + (classNodes.length > 0 ? classVerticalSpacing / 2 : 0); // Center vertically
-
-                let currentClassY = initialClassY;
-
-                classNodes.forEach((classNode, classIndex) => {
-                    calculatedPositions.set(classNode.id, { x: currentClassX, y: currentClassY });
-
-                    // Position Level 2 (Servers) vertically below each class node
-                    const serverNodes = Array.from(nodesMap.values()).filter(node => node.type === 'item' && node.parentId === classNode.id);
-                    const serverVerticalSpacing = 40; // Spacing between server nodes vertically
-                    const initialServerOffsetY = 60; // Initial offset below the class node
-
-                    serverNodes.forEach((serverNode, serverIndex) => {
-                        const serverX = currentClassX; // Align servers horizontally with their class
-                        const serverY = currentClassY + initialServerOffsetY + serverIndex * serverVerticalSpacing;
-                        calculatedPositions.set(serverNode.id, { x: serverX, y: serverY });
-                    });
-                    
-                    // Move currentClassY for the next class's branch
-                    currentClassY += (serverNodes.length * serverVerticalSpacing) + initialServerOffsetY + classVerticalSpacing;
-                });
-
-                return calculatedPositions;
-            }, [mindMapData, dimensions]);
-
-            // All generated nodes are visible in this new structure
-            const visibleNodes = useMemo(() => {
-                return Array.from(mindMapData.nodes.values());
-            }, [mindMapData]);
-
-            const visibleLinks = useMemo(() => {
-                return mindMapData.links.map(link => {
-                    const sourcePos = positionedNodes.get(link.source);
-                    const targetPos = positionedNodes.get(link.target);
-                    return {
-                        source: sourcePos,
-                        target: targetPos
-                    };
-                }).filter(link => link.source && link.target);
-            }, [mindMapData, positionedNodes]);
-
-            // Fallback message if no data to display mind map
-            if (mindMapData.nodes.size === 1 && (mindMapData.nodes.has('root-prompt') || mindMapData.nodes.has('root-no-data'))) {
-                const fallbackNode = mindMapData.nodes.values().next().value;
-                return (
-                    <div className="bg-gradient-to-br from-white to-gray-50 p-8 rounded-xl shadow-lg border border-gray-100 text-center h-full min-h-[600px] flex flex-col items-center justify-center">
-                        <i className={`${fallbackNode.icon} fa-fw mx-auto text-gray-400 mb-4 text-5xl`}></i>
-                        <h3 className="text-xl font-bold text-gray-700">{fallbackNode.label}</h3>
-                        {fallbackNode.id === 'root-prompt' && <p className="text-gray-500">يرجى استخدام قائمة "نوع الخدمة" في الأعلى لتحديد خدمة معينة.</p>}
-                    </div>
-                );
-            }
-
-            return (
-                <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 h-full min-h-[600px] flex items-center justify-center overflow-x-auto">
-                    <svg ref={svgRef} width={dimensions.width} height={dimensions.height} viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}>
-                        <defs>
-                            {/* Define shadow filter for nodes */}
-                            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-                                <feDropShadow dx="2" dy="2" stdDeviation="3" floodColor="#000" floodOpacity="0.2"/>
-                            </filter>
-                        </defs>
-                        {/* Render links (lines connecting nodes) */}
-                        {visibleLinks.map((link, index) => (
-                            <path 
-                                key={index}
-                                d={calculateBezierPath(link.source, link.target)}
-                                className="mind-map-line"
-                            />
-                        ))}
-                        {/* Render nodes (rectangles with text) */}
-                        {visibleNodes.map((node, index) => {
-                            const position = positionedNodes.get(node.id);
-                            if (!position) return null; // Node not positioned (e.g., collapsed)
-
-                            // Estimate text width for dynamic rectangle sizing
-                            // This is a rough estimate; for precise sizing, one would need to measure text in SVG
-                            const textLengthMultiplier = (node.label.length > 20) ? 9 : 10; // Adjust for longer texts
-                            const textWidth = node.label.length * textLengthMultiplier + (node.icon ? 30 : 20); 
-                            const rectWidth = Math.max(150, textWidth); // Minimum width for better appearance
-                            const rectHeight = 40;
-                            const rectX = position.x - rectWidth / 2;
-                            const rectY = position.y - rectHeight / 2;
-
-                            // Determine fill color based on node type and average
-                            let fillColor = '';
-                            let strokeColor = '';
-                            let textColor = 'var(--dark-text)'; // Default text color
-
-                            if (node.type === 'root') {
-                                fillColor = node.color || 'var(--primary-purple)';
-                                strokeColor = node.color || 'var(--gradient-start)'; // Use node.color for stroke as well
-                                textColor = '#ffffff'; // White for root text
-                            } else if (node.type === 'category') { // Classes
-                                fillColor = node.color ? node.color + '20' : '#a7c0f0'; // Lighter tint of average color
-                                strokeColor = node.color || 'var(--primary-purple)';
-                            } else { // Items (Servers)
-                                fillColor = node.color ? node.color + '10' : 'var(--light-blue-bg)'; // Even lighter tint
-                                strokeColor = node.color || 'var(--border-color)';
-                            }
-
-
-                            return (
-                                <g key={node.id} >
-                                    <rect 
-                                        x={rectX} y={rectY} 
-                                        width={rectWidth} height={rectHeight} 
-                                        rx="8" ry="8"
-                                        style={{ fill: fillColor, stroke: strokeColor, strokeWidth: 1, filter: 'url(#shadow)' }}
-                                    />
-                                    {node.icon && (
-                                        <foreignObject x={rectX + (rectWidth / 2) - 12} y={rectY + 5} width="24" height="24">
-                                            <i className={`${node.icon} text-lg`} style={{ color: node.type === 'root' ? 'white' : 'var(--primary-purple)' }}></i>
-                                        </foreignObject>
-                                    )}
-                                    <text 
-                                        x={position.x} 
-                                        y={position.y + (node.icon ? 20 : 5)} /* Adjust text position if icon is present */
-                                        className={`mind-map-node-text ${node.type}`}
-                                        style={{ fill: textColor }}
-                                    >
-                                        {node.label}
-                                    </text>
-                                </g>
-                            );
-                        })}
-                    </svg>
-                </div>
-            );
-        };
-
-        /**
          * Main React component for the Server Evaluation Dashboard.
          * Manages data, filters, sorting, tabs, and renders charts and server lists.
          * @param {Object} props - Component props.
@@ -886,6 +541,17 @@
             // State for AI suggestions
             const [generatedSuggestions, setGeneratedSuggestions] = useState({}); // { serverName: "suggestions text" }
             const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState({}); // { serverName: boolean }
+
+            // Ref to track if the component is mounted to prevent state updates on unmounted components
+            const isMounted = useRef(false);
+
+            useEffect(() => {
+                isMounted.current = true; // Component is mounted
+                return () => {
+                    isMounted.current = false; // Component is unmounted
+                };
+            }, []);
+
 
             // Refs for Chart.js canvases
             const radarChartRef = useRef(null);
@@ -1285,6 +951,8 @@
              * @returns {Promise<void>}
              */
             const generateSuggestionsForServer = async (server) => {
+                if (!isMounted.current) return; // Prevent state update if component is unmounted
+
                 setIsGeneratingSuggestions(prev => ({ ...prev, [server.name]: true })); // Set loading state for this server
                 setGeneratedSuggestions(prev => ({ ...prev, [server.name]: '' })); // Clear previous suggestions
 
@@ -1331,7 +999,9 @@
                             result.candidates[0].content && result.candidates[0].content.parts &&
                             result.candidates[0].content.parts.length > 0) {
                             const text = result.candidates[0].content.parts[0].text;
-                            setGeneratedSuggestions(prev => ({ ...prev, [server.name]: text }));
+                            if (isMounted.current) { // Check again before setting state
+                                setGeneratedSuggestions(prev => ({ ...prev, [server.name]: text }));
+                            }
                             break; // Success, exit retry loop
                         } else {
                             throw new Error('Unexpected API response structure or missing content');
@@ -1344,12 +1014,16 @@
                             delay *= 2; // Exponential backoff
                         } else {
                             // Max retries reached, display error message
-                            window.showMessage('error', `حدث خطأ أثناء توليد الاقتراحات للخادم ${server.name}. يرجى المحاولة مرة أخرى.`);
-                            setGeneratedSuggestions(prev => ({ ...prev, [server.name]: 'تعذر توليد الاقتراحات.' }));
+                            if (isMounted.current) { // Check again before setting state
+                                window.showMessage('error', `حدث خطأ أثناء توليد الاقتراحات للخادم ${server.name}. يرجى المحاولة مرة أخرى.`);
+                                setGeneratedSuggestions(prev => ({ ...prev, [server.name]: 'تعذر توليد الاقتراحات.' }));
+                            }
                         }
                     }
                 }
-                setIsGeneratingSuggestions(prev => ({ ...prev, [server.name]: false })); // Reset loading state
+                if (isMounted.current) { // Check again before setting state
+                    setIsGeneratingSuggestions(prev => ({ ...prev, [server.name]: false })); // Reset loading state
+                }
             };
 
             /**
@@ -1413,6 +1087,305 @@
                     </div>
                 );
             };
+
+            /**
+             * Helper function to get color based on average score.
+             * This logic is duplicated from the main component's server list rendering.
+             * @param {number} average - The average score (0-1).
+             * @returns {string} The Tailwind CSS color class or hex code.
+             */
+            const getScoreColor = (average) => {
+                if (average >= 0.9) return '#10b981'; // Green (ممتاز)
+                if (average >= 0.8) return '#3b82f6'; // Blue (جيد جداً)
+                if (average >= 0.7) return '#f59e0b'; // Yellow (جيد)
+                if (average >= 0.6) return '#f97316'; // Orange (مقبول)
+                return '#ef4444'; // Red (ضعيف)
+            };
+
+
+            /**
+             * React component for rendering a dynamic Mind Map using SVG.
+             * Displays filtered data categories and sample items.
+             * @param {Object} props - Component props.
+             * @param {Array<Object>} props.data - The filtered data to display in the mind map.
+             * @param {string} props.selectedService - The currently selected service from the filter.
+             */
+            const MindMap = ({ data, selectedService }) => { 
+                const svgRef = useRef(null);
+                const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+                // expandedNodes will now track classes
+                const [expandedNodes, setExpandedNodes] = useState({}); 
+
+                // Effect to update SVG dimensions on window resize
+                useEffect(() => {
+                    const updateDimensions = () => {
+                        if (svgRef.current && svgRef.current.parentElement) {
+                            setDimensions({
+                                width: svgRef.current.parentElement.clientWidth,
+                                height: Math.max(600, svgRef.current.parentElement.clientHeight) // Minimum height
+                            });
+                        }
+                    };
+                    updateDimensions(); // Initial dimensions
+                    window.addEventListener('resize', updateDimensions); // Add resize listener
+                    return () => window.removeEventListener('resize', updateDimensions); // Cleanup
+                }, []);
+
+                // Toggle node expansion for classes
+                const toggleExpand = useCallback((nodeId) => {
+                    setExpandedNodes(prev => ({
+                        ...prev,
+                        [nodeId]: !prev[nodeId]
+                    }));
+                }, []);
+
+                // If 'الكل' is selected for service, display a message
+                if (selectedService === 'الكل') {
+                    return (
+                        <div className="bg-gradient-to-br from-white to-gray-50 p-8 rounded-xl shadow-lg border border-gray-100 text-center h-full min-h-[600px] flex flex-col items-center justify-center">
+                            <i className="fas fa-info-circle fa-fw mx-auto text-gray-400 mb-4 text-5xl"></i>
+                            <h3 className="text-xl font-bold text-gray-700">الرجاء اختيار نوع خدمة محدد لعرض الخريطة الذهنية</h3>
+                            <p className="text-gray-500">الخريطة الذهنية تتطلب تحديد خدمة معينة لتنظيم البيانات بشكل فعال.</p>
+                        </div>
+                    );
+                }
+
+                // Prepare hierarchical data for the mind map
+                const mindMapData = useMemo(() => {
+                    const nodes = new Map();
+                    const links = [];
+
+                    // Calculate average for the selected service (root node)
+                    const serversInSelectedService = data.filter(item => item.service === selectedService);
+                    const serviceAvg = serversInSelectedService.length > 0 
+                        ? (serversInSelectedService.reduce((sum, item) => sum + item.average, 0) / serversInSelectedService.length) 
+                        : 0; // Keep as decimal for getScoreColor
+                    const serviceLabel = `${selectedService} (${(serviceAvg * 100).toFixed(1)}%)`;
+
+                    // Root node: Selected Service with its average
+                    const root = { id: `service-root-${selectedService}`, label: serviceLabel, type: 'root', children: [], average: serviceAvg };
+                    nodes.set(root.id, root);
+
+                    // Group data by class for the selected service
+                    const classesInServiceMap = new Map();
+                    data.filter(item => item.service === selectedService)
+                        .forEach(item => {
+                            if (!classesInServiceMap.has(item.class)) {
+                                classesInServiceMap.set(item.class, []);
+                            }
+                            classesInServiceMap.get(item.class).push(item);
+                        });
+                    
+                    const uniqueClasses = Array.from(classesInServiceMap.keys()).sort();
+
+                    // Limit to 5 classes as requested by "الخمس فصول" (although the data might have more)
+                    const limitedClasses = uniqueClasses.slice(0, 5);
+
+                    limitedClasses.forEach(cls => {
+                        const classNodeId = `class-${cls}`;
+                        // Initialize class nodes as expanded by default for better initial view
+                        setExpandedNodes(prev => ({ ...prev, [classNodeId]: true })); 
+
+                        const serversInClass = classesInServiceMap.get(cls) || [];
+                        const classAvg = serversInClass.length > 0 
+                            ? (serversInClass.reduce((sum, item) => sum + item.average, 0) / serversInClass.length) 
+                            : 0; // Keep as decimal for getScoreColor
+                        const classLabel = `${cls} (${(classAvg * 100).toFixed(1)}%)`;
+
+                        const classNode = { id: classNodeId, label: classLabel, type: 'category', parentId: root.id, children: [], average: classAvg };
+                        nodes.set(classNode.id, classNode);
+                        links.push({ source: root.id, target: classNode.id });
+
+                        // Servers within this class and service
+                        serversInClass.forEach(server => {
+                            const serverNodeId = `server-${server.name}`;
+                            const serverLabel = `${server.fullName || server.name}`; // Removed percentage from label, will be in rect color
+                            // Pass the average to the node for coloring
+                            const serverNode = { id: serverNodeId, label: serverLabel, type: 'item', parentId: classNode.id, average: server.average };
+                            nodes.set(serverNode.id, serverNode);
+                            links.push({ source: classNode.id, target: serverNode.id });
+                            classNode.children.push(serverNode.id); // Add server to class children
+                        });
+                        root.children.push(classNode.id); // Add class to root children
+                    });
+
+                    return { nodes, links };
+                }, [data, selectedService]); // Dependencies for this memo
+
+                // Calculate positions for nodes
+                const positionedNodes = useMemo(() => {
+                    const nodesMap = mindMapData.nodes;
+                    const calculatedPositions = new Map();
+
+                    const rootNode = nodesMap.get(`service-root-${selectedService}`);
+                    if (rootNode) {
+                        // Root at top center
+                        calculatedPositions.set(rootNode.id, { x: dimensions.width / 2, y: 50 });
+                    }
+
+                    // Position classes horizontally below the root
+                    const classNodes = Array.from(nodesMap.values()).filter(node => node.type === 'category' && node.parentId === rootNode.id);
+                    const classSpacingX = 280; // Increased horizontal spacing between class nodes
+                    const classStartY = 180; // Y position for class nodes, pushed down more
+
+                    const totalClassWidth = classNodes.length * classSpacingX;
+                    let startX = (dimensions.width - totalClassWidth) / 2 + classSpacingX / 2;
+
+                    classNodes.forEach((classNode, index) => {
+                        const x = startX + index * classSpacingX;
+                        const y = classStartY;
+                        calculatedPositions.set(classNode.id, { x, y });
+
+                        // Position servers vertically below each class
+                        if (expandedNodes[classNode.id]) { // Only position if expanded
+                            const serversInClass = Array.from(nodesMap.values()).filter(node => node.type === 'item' && node.parentId === classNode.id);
+                            const serverSpacingY = 45; // Increased vertical spacing between server nodes
+                            const serverStartY = y + 100; // Initial offset below the class node, pushed down more
+
+                            serversInClass.forEach((serverNode, serverIndex) => {
+                                const serverX = x; // Align servers horizontally with their class
+                                const serverY = serverStartY + serverIndex * serverSpacingY;
+                                calculatedPositions.set(serverNode.id, { x: serverX, y: serverY });
+                            });
+                        }
+                    });
+
+                    return calculatedPositions;
+                }, [mindMapData, dimensions, expandedNodes, selectedService]);
+
+                // Filter nodes and links to display based on expanded state
+                const visibleNodes = useMemo(() => {
+                    const nodes = [];
+                    mindMapData.nodes.forEach(node => {
+                        if (node.type === 'root') {
+                            nodes.push(node);
+                        } else if (node.type === 'category' && node.parentId === `service-root-${selectedService}`) {
+                            nodes.push(node);
+                        } else if (node.type === 'item' && expandedNodes[node.parentId]) {
+                            nodes.push(node);
+                        }
+                    });
+                    return nodes;
+                }, [mindMapData, expandedNodes, selectedService]);
+
+                const visibleLinks = useMemo(() => {
+                    const links = [];
+                    mindMapData.links.forEach(link => {
+                        const sourceNode = mindMapData.nodes.get(link.source);
+                        const targetNode = mindMapData.nodes.get(link.target);
+                        if (sourceNode && targetNode) {
+                            // Check if both source and target nodes are visible
+                            const isSourceVisible = visibleNodes.some(n => n.id === sourceNode.id);
+                            const isTargetVisible = visibleNodes.some(n => n.id === targetNode.id);
+
+                            if (isSourceVisible && isTargetVisible) {
+                                const sourcePos = positionedNodes.get(link.source);
+                                const targetPos = positionedNodes.get(link.target);
+                                if (sourcePos && targetPos) {
+                                    links.push({
+                                        source: sourcePos,
+                                        target: targetPos
+                                    });
+                                }
+                            }
+                        }
+                    });
+                    return links;
+                }, [mindMapData, visibleNodes, positionedNodes]);
+
+                // Fallback message if no data to display mind map
+                if (data.length === 0) {
+                    return (
+                        <div className="bg-gradient-to-br from-white to-gray-50 p-8 rounded-xl shadow-lg border border-gray-100 text-center h-full min-h-[600px] flex flex-col items-center justify-center">
+                            <i className="fas fa-info-circle fa-fw mx-auto text-gray-400 mb-4 text-5xl"></i>
+                            <h3 className="text-xl font-bold text-gray-700">لا توجد بيانات لعرض الخريطة الذهنية</h3>
+                            <p className="text-gray-500">يرجى رفع ملف Excel يحتوي على بيانات لإنشاء الخريطة الذهنية.</p>
+                        </div>
+                    );
+                }
+
+
+                return (
+                    <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 h-full min-h-[600px] flex items-center justify-center">
+                        <svg ref={svgRef} width="100%" height="100%" viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}>
+                            <defs>
+                                {/* Define shadow filter for nodes */}
+                                <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                                    <feDropShadow dx="2" dy="2" stdDeviation="3" floodColor="#000" floodOpacity="0.2"/>
+                                </filter>
+                            </defs>
+                            {/* Render links (lines connecting nodes) */}
+                            {visibleLinks.map((link, index) => (
+                                <line 
+                                    key={index}
+                                    x1={link.source.x} y1={link.source.y}
+                                    x2={link.target.x} y2={link.target.y}
+                                    className="mind-map-line"
+                                />
+                            ))}
+                            {/* Render nodes (rectangles with text) */}
+                            {visibleNodes.map((node, index) => {
+                                const position = positionedNodes.get(node.id);
+                                if (!position) return null; // Node not positioned (e.g., collapsed)
+
+                                const textWidth = node.label.length * 8 + (node.icon ? 30 : 20); 
+                                const rectWidth = Math.max(120, textWidth); // Min width for better appearance
+                                const rectHeight = 40;
+                                const rectX = position.x - rectWidth / 2;
+                                const rectY = position.y - rectHeight / 2;
+
+                                const isClickable = node.type === 'category'; // Only categories are expandable
+
+                                // Determine text color for server nodes based on average score
+                                const textColor = node.type === 'item' ? '#000' : // Black for server names
+                                                  node.type === 'root' ? '#ffffff' : '#333'; // White for root, default for category
+
+                                // Determine background color for the rectangle based on node type and average
+                                let rectFillColor;
+                                if (node.type === 'root' || node.type === 'category' || node.type === 'item') {
+                                    rectFillColor = getScoreColor(node.average);
+                                } else {
+                                    rectFillColor = '#e0e7ff'; // Default light blue if no average
+                                }
+
+                                return (
+                                    <g 
+                                        key={node.id} 
+                                        onClick={isClickable ? () => toggleExpand(node.id) : undefined}
+                                        style={{ cursor: isClickable ? 'pointer' : 'default' }}
+                                    >
+                                        <rect 
+                                            x={rectX} y={rectY} 
+                                            width={rectWidth} height={rectHeight} 
+                                            className={`mind-map-rect`} // Removed dynamic class, using inline style for fill
+                                            style={{ filter: 'url(#shadow)', fill: rectFillColor }} // Apply shadow filter and dynamic fill color
+                                        />
+                                        {node.icon && (
+                                            <foreignObject x={rectX + 10} y={rectY + rectHeight / 2 - 10} width="20" height="20">
+                                                <i className={`${node.icon} text-lg`} style={{ color: node.type === 'root' ? 'white' : '#4a00e0' }}></i>
+                                            </foreignObject>
+                                        )}
+                                        <text 
+                                            x={node.icon ? position.x + 10 : position.x} 
+                                            y={position.y + 5} 
+                                            className={`mind-map-node-text`} // Removed dynamic class, using inline style for fill
+                                            style={{ fill: textColor }} // Apply dynamic text color
+                                        >
+                                            {node.label}
+                                            {node.type === 'category' && (
+                                                <tspan dx="5" dy="0">
+                                                    {expandedNodes[node.id] ? '(-)' : '(+)'}
+                                                </tspan>
+                                            )}
+                                        </text>
+                                    </g>
+                                );
+                            })}
+                        </svg>
+                    </div>
+                );
+            };
+
 
             return (
                 <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100" dir="rtl">
@@ -2043,16 +2016,10 @@
          * @param {Array} dataToDisplay - The data to be displayed in the dashboard.
          */
         const renderDashboard = (dataToDisplay) => {
-            console.log('renderDashboard called with data:', dataToDisplay); // Added log
             const rootElement = document.getElementById('react-dashboard-root');
-            if (!rootElement) {
-                console.error('React root element not found!');
-                return; // Exit if root element is not found
-            }
             if (!reactRoot) {
                 // Create a React root if it's doesn't exist
                 reactRoot = ReactDOM.createRoot(rootElement);
-                console.log('React root created.'); // Added log
             }
             globalDashboardData = dataToDisplay; // Store data globally
             // Render the ServerEvaluationDashboard React component with the initial data
@@ -2064,13 +2031,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('fileUploadSection').style.display = 'block';
             document.getElementById('loadingScreen').style.display = 'none';
-            // Wait for window.ServerEvaluationDashboard to be defined before rendering
-            const checkReactReady = setInterval(() => {
-                if (window.ServerEvaluationDashboard) {
-                    clearInterval(checkReactReady);
-                    renderDashboard([]); // Render an empty dashboard initially
-                }
-            }, 50); // Check every 50ms
+            renderDashboard([]); // Render an empty dashboard initially
         });
     </script>
 </body>
